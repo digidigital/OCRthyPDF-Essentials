@@ -1,0 +1,54 @@
+name: ocrthypdf
+title: OCRthyPDF Essentials
+base: core18 # the base snap is the execution environment for this snap
+adopt-info: ocrthypdf
+summary: Make your PDF files text-searchable (A GUI for OCRmyPDF)
+description: |
+This is a basic user interface for the command line tool OCRmyPDF. 
+It's main purpose is to provide users that are not used to command 
+line tools easy access to OCRmyPDF's basic features.  
+You can use it to make PDF files that contain images with text 
+(e. g. after scanning) searchable by adding an invisible text layer.
+Currently supported languages 
+English, German, French, Spanish, Portuguese, Russian, Finnish
+If you like the results created with OCRthyPDF but need more flexibility
+or more languages  I suggest you give OCRmyPDF a try on the command line. 
+license: AGPL-3.0
+compression: lzo 
+grade: stable # 'stable' 'devel'
+confinement: strict # 'strict' 'devmode'
+
+apps:
+  ocrthypdf:
+    command: python3 $SNAP/code/OCRthyPDF.py
+    command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
+    desktop: /build/ocrthypdf/parts/get-source/src/gui/ocrthypdf.desktop
+    extensions: [gnome-3-28]
+    plugs:
+      - home
+      - removable-media
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
+      - x11
+    
+parts:
+  get-source:
+    plugin: dump
+    source: https://github.com/digidigital/OCRthyPDF-Essentials.git
+  tcltk-launch:
+    plugin: nil
+    stage-snaps: [tcltk-launch]
+  debian-multiarch-triplet-provider-launch:
+    plugin: nil
+    stage-snaps: [debian-multiarch-triplet-provider-launch]
+  ocrthypdf:
+    plugin: python
+    source: https://github.com/digidigital/OCRthyPDF-Essentials.git
+    source-type: git
+    python-packages: [PySimpleGUI, ocrmypdf]
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, python3-pip, tesseract-ocr, tesseract-ocr-eng, tesseract-ocr-fin, tesseract-ocr-fra, tesseract-ocr-spa, tesseract-ocr-por, tesseract-ocr-deu, zlib1g] 
+    override-pull: |
+      snapcraftctl pull  
+      snapcraftctl set-version "$(git describe --tags)"
