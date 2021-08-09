@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46666"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="icon.svg"
+   inkscape:export-filename="/home/bjoern/Dokumente/python progs/OCRthyPDF/icons/icon.png"
+   inkscape:export-xdpi="96.000008"
+   inkscape:export-ydpi="96.000008">
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient887">
+      <stop
+         style="stop-color:#f20000;stop-opacity:1"
+         offset="0"
+         id="stop883" />
+      <stop
+         style="stop-color:#ffc8c8;stop-opacity:1"
+         offset="1"
+         id="stop885" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient887"
+       id="linearGradient889"
+       x1="13.607133"
+       y1="338.57739"
+       x2="54.560856"
+       y2="153.36906"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.0234605,0,0,1.0141272,-2.3742687,-3.0509757)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.175"
+     inkscape:cx="493.715"
+     inkscape:cy="-114.2635"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="982"
+     inkscape:window-height="424"
+     inkscape:window-x="299"
+     inkscape:window-y="256"
+     inkscape:window-maximized="0"
+     units="px" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-161.53336)">
+    <rect
+       style="opacity:1;fill:url(#linearGradient889);fill-opacity:1;stroke:#000000;stroke-width:5.77140617;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect859"
+       width="127.27157"
+       height="128.02753"
+       x="4.5889173"
+       y="165.51752"
+       rx="0.10234611" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'DejaVu Sans Mono';-inkscape-font-specification:'DejaVu Sans Mono';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="46.869045"
+       y="52.827377"
+       id="text817"><tspan
+         sodipodi:role="line"
+         x="46.869045"
+         y="62.191147"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:FreeMono;-inkscape-font-specification:FreeMono;stroke-width:0.26458332"
+         id="tspan821" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:38.58828735px;line-height:1.25;font-family:'Sansita Swashed';-inkscape-font-specification:'Sansita Swashed';letter-spacing:0px;word-spacing:0px;fill:#000080;fill-opacity:1;stroke:none;stroke-width:0.96470726"
+       x="95.841728"
+       y="229.92183"
+       id="text853"
+       transform="matrix(1.0621971,0.3403043,-0.27814287,0.85233408,0,0)"
+       inkscape:transform-center-x="5.8799293"
+       inkscape:transform-center-y="-1.8708866"><tspan
+         sodipodi:role="line"
+         id="tspan851"
+         x="95.841728"
+         y="229.92183"
+         style="fill:#000080;stroke-width:0.96470726">thy</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:FreeMono;-inkscape-font-specification:'FreeMono Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="21.114292"
+       y="204.71931"
+       id="text849"><tspan
+         sodipodi:role="line"
+         id="tspan847"
+         x="21.114292"
+         y="204.71931"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.79999924px;font-family:FreeMono;-inkscape-font-specification:'FreeMono Bold';stroke-width:0.26458332">OCR</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Sansita Swashed';-inkscape-font-specification:'Sansita Swashed';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="24.588795"
+       y="283.08301"
+       id="text857"><tspan
+         sodipodi:role="line"
+         id="tspan855"
+         x="24.588795"
+         y="283.08301"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.79999924px;font-family:FreeMono;-inkscape-font-specification:'FreeMono Bold';stroke-width:0.26458332">PDF</tspan></text>
+  </g>
+</svg>
