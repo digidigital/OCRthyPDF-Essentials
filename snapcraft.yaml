@@ -44,8 +44,8 @@ parts:
     plugin: python
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
-    python-packages: [PySimpleGUI, ocrmypdf]
-    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, python3-pip, tesseract-ocr-all, zlib1g] 
+    python-packages: [PySimpleGUI, ocrmypdf, os, random, ast, signal, subprocess, shlex, configparser]
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, zlib1g] 
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
