@@ -1,0 +1,48 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Contact: Kornel Lesiński <kornel@pngquant.org>
+Source: https://github.com/pornel/pngquant/releases
+
+Files: *
+Copyright: © 1997-2002 Greg Roelofs <newt@pobox.com>
+           © 1989-1991 Jef Poskanzer <jef@acme.com>
+           © 2009-2016 Kornel Lesiński <kornel@pngquant.org>
+License: BSD-2-clause
+
+License: BSD-2-clause
+   Permission to use, copy, modify, and distribute this software and its
+   documentation for any purpose and without fee is hereby granted, provided
+   that the above copyright notice appear in all copies and that both that
+   copyright notice and this permission notice appear in supporting
+   documentation.  This software is provided "as is" without express or
+   implied warranty.
+ .
+ On Debian systems, the BSD license can be found at /usr/share/common-licenses/
+
+Files: rwpng.*
+Copyright: © 1998-2002 Greg Roelofs <newt@pobox.com>
+License: BSD-3-clause
+   This software is provided "as is," without warranty of any kind,
+   express or implied.  In no event shall the author or contributors
+   be held liable for any damages arising in any way from the use of
+   this software.
+ .
+   Permission is granted to anyone to use this software for any purpose,
+   including commercial applications, and to alter it and redistribute
+   it freely, subject to the following restrictions:
+ -
+   1. Redistributions of source code must retain the above copyright
+      notice, disclaimer, and this list of conditions.
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, disclaimer, and this list of conditions in the documenta-
+      tion and/or other materials provided with the distribution.
+   3. All advertising materials mentioning features or use of this
+      software must display the following acknowledgment:
+ .
+         This product includes software developed by Greg Roelofs
+         and contributors for the book, "PNG: The Definitive Guide,"
+         published by O'Reilly and Associates.
+
+Files: debian/*
+Copyright: © 2005-2008 Nelson A. de Oliveira <naoliv@gmail.com>
+           © 2013-2017 Andreas Tille <tille@debian.org>
+License: BSD-2-clause
