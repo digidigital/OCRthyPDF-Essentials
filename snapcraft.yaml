@@ -15,7 +15,8 @@ icon: gui/ocrthypdf.svg
 compression: lzo 
 grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
-architectures: [amd64]
+architectures:
+  - build-on: amd64
 
 apps:
   ocrthypdf:
