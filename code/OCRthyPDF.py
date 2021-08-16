@@ -2,25 +2,19 @@
 
 license = """OCRthyPDF Essentials
 Make your PDF files text-searchable (A GUI for OCRmyPDF)
-
 Copyright (C) 2021 Björn Seipel
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
 by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
-
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see 
 https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/LICENSE
-
 Licenses used by other software in the snap version:
-
 OCRmyPDF - Mozilla Public License 2.0 http://mozilla.org/MPL/2.0/
 For details of licenses used by OCRmyPDF see https://github.com/jbarlow83/OCRmyPDF/blob/master/debian/copyright
 """
@@ -83,7 +77,17 @@ exitCode = {
 
 
 def getLangs():
-    tesseractOutput = subprocess.check_output('tesseract --list-langs', stderr=subprocess.STDOUT , shell=True, text=True).split('\n')
+    # does not work in snap's standard python version.
+    # Keeping it for future revision since workaround is easier than addin required version of python to snap ;)
+    #tesseractOutput = subprocess.check_output('tesseract --list-langs', stderr=subprocess.STDOUT , shell=True, text=True).split('\n')
+    args = shlex.split('tesseract --list-langs')
+    p = subprocess.Popen (args,stdout=subprocess.PIPE)
+    tesseractOutput =[]
+    while True:
+        tesseractOutput.append(p.stdout.readline().decode().strip())
+        if p.poll() is not None:
+            break  
+    print (tesseractOutput)
     languageList = []
     for line in tesseractOutput:
         if line != 'osd' and line != '' and not line.startswith('List'):
