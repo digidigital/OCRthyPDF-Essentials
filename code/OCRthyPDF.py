@@ -325,10 +325,10 @@ while True:
  
         
         args = shlex.split(commandLine)
- 
+        print(args)
         p = subprocess.Popen (args,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         #make STDOUT/readline non-blocking!
-        set_blocking(p.stdout.fileno(), False)
+        #set_blocking(p.stdout.fileno(), False)
         progressValue = 0
         #clear console tab and print command line
         window['console'].update(value=commandLine + "\n")
