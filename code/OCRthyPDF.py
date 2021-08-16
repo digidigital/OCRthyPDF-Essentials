@@ -164,7 +164,7 @@ layout = [
                 sg.Text(('PDF:')), 
                 sg.InputText(key='filename_short-', readonly=True, size=(60,1)), 
                 sg.InputText(key='filename', visible=False,  readonly=True, enable_events=True), 
-                sg.FileBrowse(('Browse'), initial_folder = environ['HOME'], file_types=(("PDF", "*.pdf"),("PDF", "*.PDF"),),)
+                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF"),),)
             ],
             #[sg.Checkbox('Advanced options', key='advanced_options', enable_events=True)],
             [
