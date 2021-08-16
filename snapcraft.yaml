@@ -51,7 +51,9 @@ parts:
     build-packages:
       - on amd64:
         - gcc-multilib
-        - g++-multilib    
+        - g++-multilib  
+    stage-packages:
+      - lib32stdc++6
   ocrthypdf:
     plugin: python
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
