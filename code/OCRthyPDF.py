@@ -21,7 +21,7 @@ For details of licenses used by OCRmyPDF see https://github.com/jbarlow83/OCRmyP
 
 from os import path, getcwd, environ, makedirs, listdir, set_blocking 
 import PySimpleGUI as sg
-import ocrmypdf, ast, signal, subprocess, shlex, sys
+import ast, signal, subprocess, shlex, sys
 from configparser import ConfigParser
 from random import randint
 
