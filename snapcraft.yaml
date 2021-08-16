@@ -29,6 +29,7 @@ apps:
     plugs:
       - home
       - removable-media
+      - mount-observe
       - desktop
       - desktop-legacy
       - wayland
