@@ -1,6 +1,6 @@
 name: ocrthypdf
 title: OCRthyPDF Essentials
-base: core20 # the base snap is the execution environment for this snap
+base: core18 # the base snap is the execution environment for this snap
 adopt-info: ocrthypdf
 summary: Make your PDF files text-searchable (A GUI for OCRmyPDF)
 description: |
@@ -25,7 +25,7 @@ apps:
     command: bin/snapcraft-preload python3 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
     desktop: /build/ocrthypdf/parts/get-source/src/gui/ocrthypdf.desktop
-    extensions: [gnome-3-38]
+    extensions: [gnome-3-28]
     plugs:
       - home
       - removable-media
@@ -58,7 +58,7 @@ parts:
     plugin: python
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
-    python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust]
+    python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust, pikepdf]
     stage-packages: [python3-tk, tcl, ocrmypdf, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, unpaper, qpdf, tesseract-ocr-all, , libxslt-dev, zlib1g] 
     build-packages: [rustc]
     override-pull: |
