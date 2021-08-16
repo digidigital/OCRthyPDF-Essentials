@@ -14,7 +14,7 @@ license: AGPL-3.0
 icon: gui/ocrthypdf.svg 
 compression: lzo 
 grade: stable # 'stable' 'devel'
-confinement: classic # 'strict' 'devmode'
+confinement: strict # 'strict' 'devmode'
 architectures:
   - build-on: amd64
 environment:
@@ -25,7 +25,7 @@ apps:
     command: bin/snapcraft-preload python3 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
     desktop: /build/ocrthypdf/parts/get-source/src/gui/ocrthypdf.desktop
-    extensions: [gnome-3-28]
+    extensions: [gnome-3-38]
     plugs:
       - home
       - removable-media
