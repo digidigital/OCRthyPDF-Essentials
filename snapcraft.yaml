@@ -11,6 +11,7 @@ description: |
   (e. g. after scanning) searchable by adding an invisible text layer.
   If you like the results created with OCRthyPDF but need more flexibility I suggest you give OCRmyPDF a try on the command line. 
 license: AGPL-3.0
+icon: gui/ocrthypdf.svg 
 compression: lzo 
 grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
