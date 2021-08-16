@@ -30,6 +30,7 @@ apps:
       - home
       - removable-media
       - mount-observe
+      - system-observe
       - desktop
       - desktop-legacy
       - wayland
