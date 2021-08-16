@@ -14,7 +14,7 @@ license: AGPL-3.0
 icon: gui/ocrthypdf.svg 
 compression: lzo 
 grade: stable # 'stable' 'devel'
-confinement: strict # 'strict' 'devmode'
+confinement: classic # 'strict' 'devmode'
 architectures:
   - build-on: amd64
 environment:
@@ -29,8 +29,6 @@ apps:
     plugs:
       - home
       - removable-media
-      - mount-observe
-      - system-observe
       - desktop
       - desktop-legacy
       - wayland
@@ -60,7 +58,8 @@ parts:
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
     python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust]
-    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, libxslt-dev, pngquant, tesseract-ocr-all, zlib1g, rustc] 
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, zlib1g] 
+    build-packages: [rustc, libxslt-dev]
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
