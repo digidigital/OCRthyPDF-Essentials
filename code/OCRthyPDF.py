@@ -325,7 +325,7 @@ while True:
 
         execute = shlex.split(commandLine)
         print('Commandline: ' + commandLine)
-        print('For Popen: ' + execute)
+        print(execute)
         p = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         #make STDOUT/readline non-blocking!
         set_blocking(p.stdout.fileno(), False)
