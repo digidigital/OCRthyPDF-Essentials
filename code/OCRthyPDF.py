@@ -21,9 +21,14 @@ For details of licenses used by OCRmyPDF see https://github.com/jbarlow83/OCRmyP
 
 from os import path, getcwd, environ, makedirs, listdir, set_blocking 
 import PySimpleGUI as sg
-import ocrmypdf, ast, signal, subprocess, shlex
+import ocrmypdf, ast, signal, subprocess, shlex, sys
 from configparser import ConfigParser
 from random import randint
+
+print("Python version")
+print (sys.version)
+print("Version info.")
+print (sys.version_info)
 
 theme='DefaultNoMoreNagging'
 sg.theme(theme)   
@@ -324,9 +329,9 @@ while True:
         commandLine = "ocrmypdf -v " + args + "'" + window['filename'].get() + "' '" + outFile + "'"
  
         
-        args = shlex.split(commandLine)
-        print (args)
-        p = subprocess.run (commandLine, shell=True, check=True)
+        execute = shlex.split(commandLine)
+        print (execute)
+        s = subprocess.run (execute, shell=True, check=True)
         '''
         p = subprocess.Popen (args,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         #make STDOUT/readline non-blocking!
