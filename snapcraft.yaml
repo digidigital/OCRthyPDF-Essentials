@@ -16,7 +16,9 @@ compression: lzo
 grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
-
+environment:
+    TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/4.00/tessdata
+    
 apps:
   ocrthypdf:
     command: python3 $SNAP/code/OCRthyPDF.py
