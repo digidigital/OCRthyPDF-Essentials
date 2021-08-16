@@ -21,14 +21,9 @@ For details of licenses used by OCRmyPDF see https://github.com/jbarlow83/OCRmyP
 
 from os import path, getcwd, environ, makedirs, listdir, set_blocking 
 import PySimpleGUI as sg
-import ast, signal, subprocess, shlex, sys
+import ocrmypdf, ast, signal, subprocess, shlex
 from configparser import ConfigParser
 from random import randint
-
-print("Python version")
-print (sys.version)
-print("Version info.")
-print (sys.version_info)
 
 theme='DefaultNoMoreNagging'
 sg.theme(theme)   
@@ -327,13 +322,11 @@ while True:
         outFile = outFileParts[0] + window['opt_postfix'].get() + '.' + outFileParts[1]
         
         commandLine = "ocrmypdf -v " + args + "'" + window['filename'].get() + "' '" + outFile + "'"
- 
-        
+
         execute = shlex.split(commandLine)
-        print (execute)
-        s = subprocess.run (execute, shell=True, check=True)
-        '''
-        p = subprocess.Popen (args,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print('Commandline: ' + commandLine)
+        print('For Popen: ' + execute)
+        p = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         #make STDOUT/readline non-blocking!
         set_blocking(p.stdout.fileno(), False)
         progressValue = 0
@@ -344,4 +337,3 @@ while True:
         #enable stop button
         window['stop_ocr'].update(disabled=False)
         runningOCR=True
-        '''
