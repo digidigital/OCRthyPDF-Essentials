@@ -22,7 +22,7 @@ environment:
 
 apps:
   ocrthypdf:
-    command: python3 $SNAP/code/OCRthyPDF.py
+    command: bin/snapcraft-preload python3 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
     desktop: /build/ocrthypdf/parts/get-source/src/gui/ocrthypdf.desktop
     extensions: [gnome-3-28]
@@ -46,8 +46,16 @@ parts:
   debian-multiarch-triplet-provider-launch:
     plugin: nil
     stage-snaps: [debian-multiarch-triplet-provider-launch]
+  snapcraft-preload:  
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    build-packages:
+      - on amd64:
+        - gcc-multilib
+        - g++-multilib    
   ocrthypdf:
     plugin: python
+    python-version: python3
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
     python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust]
