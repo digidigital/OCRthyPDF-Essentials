@@ -298,7 +298,8 @@ while True:
         window['start_ocr'].update(disabled=False)   
   
     if event == 'start_ocr':
-             
+        # check - input file selected. still exists ?
+        
         args=''
 
         # OCR languages
