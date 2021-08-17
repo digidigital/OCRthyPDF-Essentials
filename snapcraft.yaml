@@ -18,6 +18,7 @@ confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
 environment:
     TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/4.00/tessdata
+    GS_LIB: $SNAP/usr/share/ghostscript/*.*/Resource/Init 
     
 apps:
   ocrthypdf:
@@ -43,7 +44,7 @@ parts:
       plugin: cmake
       build-packages:
         - on amd64:
-          - gcc-multilib
+          - gcc-multilib$SNAP
           - g++-multilib
       stage-packages:
       - lib32stdc++6  
