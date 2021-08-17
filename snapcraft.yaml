@@ -21,7 +21,7 @@ environment:
     
 apps:
   ocrthypdf:
-    command: bin/snapcraft-preload $SNAP/python3 $SNAP/code/OCRthyPDF.py
+    command: bin/snapcraft-preload python3 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
     desktop: /build/ocrthypdf/parts/get-source/src/gui/ocrthypdf.desktop
     extensions: [gnome-3-28]
