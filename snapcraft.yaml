@@ -44,7 +44,7 @@ parts:
       plugin: cmake
       build-packages:
         - on amd64:
-          - gcc-multilib$SNAP
+          - gcc-multilib
           - g++-multilib
       stage-packages:
       - lib32stdc++6  
