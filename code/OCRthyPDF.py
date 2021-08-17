@@ -235,6 +235,15 @@ while True:
         if p.poll() is not None: 
             if p.returncode >= 0:
                 exitMessage = exitCode[p.returncode]
+                
+                #debug
+                while True:
+                    line = p.stdout.readline().decode()
+                    #update console tab
+                    if line != '':
+                        window['console'].print(line)
+                    else:
+                        break
             else:     
                 exitMessage = "Process terminated by signal"
             sg.popup('', exitMessage)
