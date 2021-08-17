@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 license = """OCRthyPDF Essentials
+
 Make your PDF files text-searchable (A GUI for OCRmyPDF)
+
 Copyright (C) 2021 Björn Seipel
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
 by the Free Software Foundation, either version 3 of the License, or
@@ -14,14 +17,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see 
 https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/LICENSE
-Licenses used by other software in the snap version:
-OCRmyPDF - Mozilla Public License 2.0 http://mozilla.org/MPL/2.0/
-For details of licenses used by OCRmyPDF see https://github.com/jbarlow83/OCRmyPDF/blob/master/debian/copyright
+
 """
 
-from os import path, getcwd, environ, makedirs, listdir, set_blocking 
+from os import path, environ, makedirs, listdir, set_blocking 
 import PySimpleGUI as sg
-import ocrmypdf, ast, signal, subprocess, shlex
+import ast, signal, subprocess, shlex
 from configparser import ConfigParser
 from random import randint
 
@@ -31,14 +32,14 @@ background = sg.LOOK_AND_FEEL_TABLE[theme]['BACKGROUND']
 
 #App values
 aboutPage = 'https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/About.md'
-version = '0.5'
+version = '0.5.1'
 applicationTitle = 'OCRthyPDF Essentials'
 
 # Read licenses
 license += """
 ********************************************
 The following components are libraries used by this program 
-or distributed with in a Snap or AppImages
+or distributed as dependencies in a Snap or AppImage
 ********************************************
 """
 licensePath = path.abspath(path.dirname(__file__))+ '/../licenses'
@@ -113,8 +114,34 @@ def writeConfig():
     config.write(fp)
     fp.close()
 
+# Just a simple popup message in a function so I can change formatting and behaviour in one place. :)
+def popUp(message):
+    windowLocation = window.current_location()
+    popWindow = sg.Window('',
+        [[sg.Text(message)],
+        [sg.OK()]
+        ], 
+        element_justification = 'c',
+        no_titlebar = True,
+        font=('Open Sans Semibold', 10, 'normal'),
+        auto_close= True,
+        auto_close_duration = 10,
+        modal=True,
+        finalize = True, 
+        keep_on_top = True,
+        location = (windowLocation[0]+window.size[0]/3,windowLocation[1]+window.size[1]/3)
+        
+    )
+        
+    while True:
+        event, values = popWindow.read() 
+        if event == sg.WIN_CLOSED: 
+            break
+        else:
+            popWindow.close()
+
 # If filename is longer than 'limit' split filename in two shorter parts an add '...' in the middle so it fits in limit
-def limitFilenameLen(filename, limit=67):
+def limitFilenameLen(filename, limit=60):
     x = len(filename)
     if x <= limit:
         return filename
@@ -162,9 +189,9 @@ tab4_layout =   [
 layout = [  
             [
                 sg.Text(('PDF:')), 
-                sg.InputText(key='filename_short-', readonly=True, size=(60,1)), 
+                sg.InputText(key='filename_short-', readonly=True, size=(52,1)), 
                 sg.InputText(key='filename', visible=False,  readonly=True, enable_events=True), 
-                sg.FileBrowse(('Browse'), initial_folder = environ['HOME'], file_types=(("PDF", "*.pdf"),("PDF", "*.PDF"),),)
+                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF"),),)
             ],
             #[sg.Checkbox('Advanced options', key='advanced_options', enable_events=True)],
             [
@@ -183,7 +210,7 @@ layout = [
          ]
 
 # Create the Window
-window = sg.Window(applicationTitle  + ' ' + version, layout, finalize = True)
+window = sg.Window(applicationTitle  + ' ' + version, layout, font=('Open Sans Semibold', 10, 'normal'), finalize = True)
 
 # Check if config file exists and create one if none exists 
 if len(config.read(configini)) == 0:
@@ -246,7 +273,7 @@ while True:
                         break
             else:     
                 exitMessage = "Process terminated by signal"
-            sg.popup('', exitMessage)
+            popUp(exitMessage)
             window['console'].print(exitMessage)
             #reset progress bar
             window['progress_bar'].update(0)
@@ -271,8 +298,7 @@ while True:
         window['start_ocr'].update(disabled=False)   
   
     if event == 'start_ocr':
-        # check - input file selected. still exists ?
-        
+             
         args=''
 
         # OCR languages
