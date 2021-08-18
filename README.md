@@ -13,7 +13,7 @@ If you like the results created with OCRthyPDf but need more flexibility I sugge
 
 # How To Install
 
-If you are using Ubuntu you can install it directly from the Snap Store 
+If you are using Ubuntu or an yother Distro that comes with <code>snap</code> pre-installed you can install it directly from the Snap Store 
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/ocrthypdf)
 
@@ -22,5 +22,8 @@ or you can type
 <code>sudo snap install ocrthypdf</code> 
 
 in your terminal.
+
+If your Distro does not have snap pre-installed you can find instructions for installing snap [here.](https://snapcraft.io/docs/installing-snapd)
+
 
 
