@@ -1,7 +1,7 @@
 # OCRthyPDF-Essentials
 Make your PDF files text-searchable (A GUI for [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/))
 
-This is a basic user interface for the command line tool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/). 
+This is a user interface for the command line tool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/). 
 
 It's main purpose is to provide users that are not used to command line tools access to OCRmyPDF's basic features.  
 
