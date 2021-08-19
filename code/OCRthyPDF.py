@@ -139,7 +139,7 @@ def popUp(message):
             popWindow.close()
 
 # If filename is longer than 'limit' split filename in two shorter parts an add '...' in the middle so it fits in limit
-def limitFilenameLen(filename, limit=60):
+def limitFilenameLen(filename, limit=57):
     x = len(filename)
     if x <= limit:
         return filename
@@ -148,7 +148,6 @@ def limitFilenameLen(filename, limit=60):
 
 # Language related
 languages = getLangs()
-
 languageCodes = { 
     'aa':'aar', 'ab':'abk', 'ae':'ave', 'af':'afr', 'ak':'aka', 'am':'amh', 'an':'arg', 'ar':'ara', 'as':'asm', 'av':'ava', 
     'ay':'aym', 'az':'aze', 'ba':'bak', 'be':'bel', 'bg':'bul', 'bh':'bih', 'bi':'bis', 'bm':'bam', 'bn':'ben', 'bo':'bod', 
@@ -170,19 +169,18 @@ languageCodes = {
     'uk':'ukr', 'ur':'urd', 'uz':'uzb', 've':'ven', 'vi':'vie', 'vo':'vol', 'wa':'wln', 'wo':'wol', 'xh':'xho', 'yi':'yid', 
     'yo':'yor', 'za':'zha', 'zh':'zho', 'zu':'zul'
 }
-
 systemLanguage = environ['LANG'][0:2]
 
 tab1_layout =   [
-                    [sg.T('Existing text/OCR strategy:'), sg.InputCombo(('Skip pages with text', 'Redo OCR', 'Force OCR'), default_value='Skip pages with text', key='opt_ocr', enable_events = True)],  
+                    [sg.T('Existing text/OCR strategy:'), sg.InputCombo(('Skip pages with text', 'Redo OCR', 'Force OCR', 'Remove ALL text'), default_value='Skip pages with text', key='opt_ocr', tooltip = '"Remove ALL text" will remove transparent AND visible text! Faster if you redo OCR on "image only" PDFs.', enable_events = True)],  
                     [sg.T('Deskew pages (crooked scans):', tooltip = 'Will correct pages scanned at a skewed angle by rotating them back into place.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_deskew', enable_events = True, tooltip = 'Will correct pages scanned at a skewed angle by rotating them back into place.')],
                     [sg.T('Fix page rotation:', tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_rotate', enable_events = True, tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.')],
                     [sg.T('Minimum page rotation confidence:'),sg.Spin(('5','10', '15', '20', '25'),initial_value = '15', key='opt_confidence', size=(2,1),enable_events=True)],
-                    [sg.T('Noise:'), sg.InputCombo(('Do nothing', 'Clean for OCR but keep original page', 'Clean for OCR and keep cleaned page'), default_value='Do nothing', key='opt_noise', enable_events = True, tooltip = 'Clean up pages before OCR. This makes it less likely that OCR will try to find text in background noise. If you keep the cleaned pages review the PDF to ensure that the program did not remove something important.')],
+                    [sg.T('Noise:'), sg.InputCombo(('Do nothing', 'Clean for OCR but keep original page', 'Clean for OCR and keep cleaned page'), default_value='Do nothing', key='opt_noise', enable_events = True, tooltip = 'Clean up pages before OCR. If you keep the cleaned pages review the OCRed PDF!')],
                     [sg.T('Remove background:'), sg.InputCombo(('yes', 'no'), default_value='no', key='opt_background', enable_events = True)],
                     [sg.T('Optimization level:'), sg.InputCombo(('0', '1', '2', '3'), default_value='1', key='opt_optimization', enable_events = True, tooltip = '0 = Disables optimization, 1 = Lossless optimizations, 2 + 3 = Reduced image quality ')],
                     [sg.T('Output type:'), sg.InputCombo(('Standard PDF', 'PDF/A-1b', 'PDF/A-2b', 'PDF/A-3b'), default_value='PDF/A-2b', key='opt_standard', enable_events = True)],
-                    [sg.T('Postfix (overwrite original if empty!):'), sg.In('_OCR', key='opt_postfix', change_submits = True, size = (15,1), enable_events = True)],
+                    [sg.T('Postfix (may overwrite original if empty!):'), sg.In('_OCR', key='opt_postfix', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Save recognized text as separate .txt file:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_sidecar', enable_events = True)]          
                 ]   
 
@@ -207,12 +205,39 @@ tab4_layout =   [
                     ]
                 ] 
 
-layout = [  
+col1 =  [
             [
-                sg.Text(('PDF:')), 
-                sg.InputText(key='filename_short-', readonly=True, size=(52,1)), 
+                sg.Text('Single PDF:', pad = ((5,0),(8,0)))
+            ],
+            [
+                sg.Text('Input Folder:', pad = ((5,0),(16,0))) 
+            ],
+            [
+                sg.Text('Output Folder:', pad = ((5,0),(16,0)))
+            ]
+        ]   
+col2 =  [
+            [
+                sg.InputText(key='filename_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='filename', visible=False,  readonly=True, enable_events=True), 
                 sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF"),),)
+            ],
+            [
+                sg.InputText(key='infolder_short', readonly=True, size=(52,1)), 
+                sg.InputText(key='infolder', visible=False,  readonly=True, enable_events=True), 
+                sg.FolderBrowse(('Browse'))
+            ],
+            [
+                sg.InputText(key='outfolder_short', readonly=True, size=(52,1)), 
+                sg.InputText(key='outfolder', visible=False,  readonly=True, enable_events=True), 
+                sg.FolderBrowse(('Browse'))
+            ]
+        ]
+
+
+layout = [  
+            [
+                sg.Column(col1, vertical_alignment = 't'), sg.Column(col2)      
             ],
             #[sg.Checkbox('Advanced options', key='advanced_options', enable_events=True)],
             [
@@ -221,12 +246,12 @@ layout = [
                     sg.Tab('Languages', tab2_layout),
                     sg.Tab('Console', tab3_layout),
                     sg.Tab('Licenses', tab4_layout)
-                ]], size = (550,300))
+                ]], size = (625,300))
             ], 
             [
                 sg.Button('Start OCR', key='start_ocr', disabled = True),
                 sg.Button('Stop OCR', key='stop_ocr', disabled = True),
-                sg.ProgressBar(100, key='progress_bar', size=(32,20))  
+                sg.ProgressBar(100, key='progress_bar', size=(39,20))  
             ]
          ]
 
@@ -314,15 +339,43 @@ while True:
     
     if event.startswith('opt'):
         writeConfig()
-         
+
     if event == 'filename' and not values['filename'] == '' : 
         # Shorten filename so it fits in the input text field
-        window['filename_short-'].update(value = limitFilenameLen(values['filename'])) 
+        window['filename_short'].update(value = limitFilenameLen(values['filename'])) 
+        # Clear infolder
+        window['infolder'].update(value = '')
+        window['infolder_short'].update(value = '')
+        # If outfolder is empty set to same folder
+        if window['outfolder'].get() == '':
+            inFilePath = path.dirname(values['filename'])
+            window['outfolder'].update(value = inFilePath)
+            window['outfolder_short'].update(value = limitFilenameLen(inFilePath))
         # Enable Start button
-        window['start_ocr'].update(disabled=False)   
+        if runningOCR == False:
+            window['start_ocr'].update(disabled=False)   
+
+    if event == 'infolder' and not values['infolder'] == '' : 
+        inFolderPath = values['infolder']
+        # Shorten filename so it fits in the input text field
+        window['infolder_short'].update(value = limitFilenameLen( inFolderPath)) 
+        # Clear single PDF input
+        window['filename'].update(value = '')
+        window['filename_short'].update(value = '')
+        # If outfolder is empty set to same folder
+        if window['outfolder'].get() == '':
+            window['outfolder'].update(value =  inFolderPath)
+            window['outfolder_short'].update(value = limitFilenameLen( inFolderPath))
+        # Enable Start button
+        if runningOCR == False:
+            window['start_ocr'].update(disabled=False) 
+
+    if event == 'outfolder' and not values['outfolder'] == '' : 
+        # Shorten filename so it fits in the input text field
+        window['outfolder_short'].update(value = limitFilenameLen(values['outfolder'])) 
+        
   
     if event == 'start_ocr':
-        # check - input file selected. still exists ?
         
         args=''
 
@@ -336,7 +389,7 @@ while True:
             args=args + "--redo-ocr "
         elif ocrStrat == "Force OCR":
             args=args + "--force-ocr "
-        elif ocrStrat == "Skip pages with text":
+        else:
             args=args + "--skip-text "       
 
         # clean
@@ -378,8 +431,9 @@ while True:
             args=args + "pdf "
         
         # split output filename and add postfix
-        outFileParts = window['filename'].get().rsplit('.', 1)
-        outFile = outFileParts[0] + window['opt_postfix'].get() + '.' + outFileParts[1]
+        inputFilename = path.basename(window['filename'].get())
+        outFileParts = inputFilename.rsplit('.', 1)
+        outFile = path.join(window['outfolder'].get(), outFileParts[0] + window['opt_postfix'].get() + '.' + outFileParts[1])
         
         commandLine = "ocrmypdf -v " + args + "'" + window['filename'].get() + "' '" + outFile + "'"
 
