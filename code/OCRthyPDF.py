@@ -32,7 +32,7 @@ background = sg.LOOK_AND_FEEL_TABLE[theme]['BACKGROUND']
 
 #App values
 aboutPage = 'https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/About.md'
-version = '0.5.2'
+version = '0.6'
 applicationTitle = 'OCRthyPDF Essentials'
 
 # Read licenses
@@ -185,6 +185,18 @@ tab1_layout =   [
                 ]   
 
 tab2_layout =   [
+                    [sg.T('Separator pattern for QR Code (postfix is optional): <Separator_Code>|<Custom_Postfix>')],
+                    [sg.T('<Custom_Postfix> is added to the filename in "Sticker Mode" if available')],
+                    [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
+                    [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
+                    [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output', enable_events = True)],                  
+                    [sg.T('Add segment number to filename:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_addpartnumber', tooltip='Set to "No" with Sticker Mode and <Custom_Postfix> to get clean filenames.', enable_events = True)],
+                    [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
+                    [sg.T('Loglevel:'), sg.InputCombo(('INFO', 'DEBUG'), default_value='INFO', key='opt_splitterloglevel', enable_events = True)],
+                            
+                ]                   
+
+tab3_layout =   [
                     [
                         sg.T('Select document language(s):')
                     ],
@@ -193,13 +205,13 @@ tab2_layout =   [
                     ]
                 ]   
 
-tab3_layout =   [
+tab4_layout =   [
                     [
                         sg.Multiline('', key='console', expand_x = True, expand_y = True)
                     ]
                 ] 
 
-tab4_layout =   [
+tab5_layout =   [
                     [
                         sg.Multiline(license, expand_x = True, expand_y = True)
                     ]
@@ -243,9 +255,10 @@ layout = [
             [
                 sg.TabGroup([[
                     sg.Tab('Options', tab1_layout), 
-                    sg.Tab('Languages', tab2_layout),
-                    sg.Tab('Console', tab3_layout),
-                    sg.Tab('Licenses', tab4_layout)
+                    sg.Tab('Splitter', tab2_layout),
+                    sg.Tab('Languages', tab3_layout),
+                    sg.Tab('Console', tab4_layout),
+                    sg.Tab('Licenses', tab5_layout)
                 ]], size = (625,300))
             ], 
             [
@@ -375,7 +388,7 @@ while True:
         window['outfolder_short'].update(value = limitFilenameLen(values['outfolder'])) 
         
   
-    if event == 'start_ocr':
+    if event == 'start_ocr':# oder Länge batch > 0?
         
         args=''
 
@@ -429,7 +442,12 @@ while True:
             args=args + "pdfa-3 "
         else: 
             args=args + "pdf "
-        
+#######################    
+# Liste von Dateien erzeugen, die OCRed werden sollen
+# wenn Einzeldatei, dann Liste mit Einzeldatei
+# Wenn Folder, dann Dateinamen übernehmen
+# 
+# While Schleife basteln   
         # split output filename and add postfix
         inputFilename = path.basename(window['filename'].get())
         outFileParts = inputFilename.rsplit('.', 1)
@@ -451,3 +469,4 @@ while True:
         #enable stop button
         window['stop_ocr'].update(disabled=False)
         runningOCR=True
+###########################
