@@ -19,6 +19,7 @@ confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
 environment:
     TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/4.00/tessdata
+    LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu
     GS_LIB: $SNAP/usr/share/ghostscript/9.26/Resource/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/9.26/Resource/Font
     
@@ -26,7 +27,7 @@ apps:
   ocrthypdf:
     command: bin/snapcraft-preload python3 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
-    desktop: /build/ocrthypdf/parts/get-source/src/gui/ocrthypdf.desktop
+    desktop: $SNAPCRAFT_PROJECT_DIR/gui/ocrthypdf.desktop
     extensions: [gnome-3-34]
     plugs:
       - home
@@ -66,3 +67,6 @@ parts:
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
+    override-build: |
+      snapcraftctl build
+      sed -i 's/find_library(libname)/"liblept.so.5"/g' $SNAPCRAFT_PART_INSTALL/lib/python3.6/site-packages/ocrmypdf/leptonica.py
