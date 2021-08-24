@@ -19,7 +19,7 @@ confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
 environment:
     TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/4.00/tessdata
-    LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib/
     GS_LIB: $SNAP/usr/share/ghostscript/9.26/Resource/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/9.26/Resource/Font
     
