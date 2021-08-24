@@ -20,11 +20,31 @@ https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/LICENSE
 
 """
 
-from os import path, environ, makedirs, listdir, set_blocking 
+from os import path, environ, getcwd, makedirs, listdir, remove, set_blocking 
 import PySimpleGUI as sg
-import ast, signal, subprocess, shlex
+import sys, ast, signal, subprocess, shlex
+import queue
+import glob
+from copy import deepcopy
 from configparser import ConfigParser
 from random import randint
+from tempfile import TemporaryDirectory
+import logging
+import argparse
+
+parser = argparse.ArgumentParser(description="OCR and QR / Barcode based splitter for PDF files")
+
+parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEBUG'],
+                    help='Available log levels: WARNING, INFO, DEBUG')
+
+args = parser.parse_args()
+
+log = logging.getLogger('OCRthyPDF')
+loglevel=logging.getLevelName(args.log)
+if isinstance(loglevel, int):
+    logging.basicConfig(level=loglevel)
+else:
+    raise ValueError('Invalid log level: %s' % loglevel)
 
 theme='DefaultNoMoreNagging'
 sg.theme(theme)   
@@ -50,14 +70,38 @@ for f in licenses:
         license += licenseFile.read()
 
 # Config related
-boolOptions = []
-stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 'deskew', 'rotate', 'background', 'sidecar']
+stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
+                 'deskew', 'rotate', 'background', 'sidecar', 'runsplitter', 
+                 'separator', 'separatorpage', 'usesourcename', 'loglevel']
+
+pathOptions = ['filename','infolder','outfolder']
+
 configPath = environ['HOME']+'/.config/OCRthyPDF'
-configini = configPath + '/config.ini'
+configini = configPath + '/config_0_6.ini'
 config = ConfigParser()
 
 # Other
 runningOCR = False
+runningSPLIT = False
+splitJobs = queue.Queue()
+ocrJobs = queue.Queue()
+Job={'running': False}
+tmpdir = TemporaryDirectory()
+
+log.debug('Temporary directory: ' + tmpdir.name)
+
+ocrQueueLen=0
+splitQueueLen=0
+
+# Needed for pyinstaller onefile...
+try:
+    scriptRoot = sys._MEIPASS
+except Exception:
+    scriptRoot = path.dirname(path.realpath(__file__))
+    
+#set the script root if in Snap environment
+if "SNAP_COMMON" in environ:
+    scriptRoot = environ['SNAP'] + '/Code/code'
 
 # OCRmyPDF Exit codes
 exitCode = { 
@@ -76,18 +120,21 @@ exitCode = {
     130 : 'The program was interrupted by pressing Stop OCR button.'
 }
 
+queuePercent = lambda a, b : int(a/b*100)
+
 def getLangs():
+    log.info('Checking for installed tesseract languages.')
     # tesseractOutput = subprocess.check_output('tesseract --list-langs', stderr=subprocess.STDOUT , shell=True, text=True).split('\n')
     # seems not work in snap's standard core18 python version.
     # Keeping it for future revision since workaround seems easier than adding required version of python to snap ;)
     args = shlex.split('tesseract --list-langs')
     p = subprocess.Popen (args,stdout=subprocess.PIPE)
-    tesseractOutput =[]
+    tesseractOutput = []
     while True:
         tesseractOutput.append(p.stdout.readline().decode().strip())
         if p.poll() is not None:
             break  
-    print (tesseractOutput)
+    log.debug(tesseractOutput)
     languageList = []
     for line in tesseractOutput:
         if line != 'osd' and line != '' and not line.startswith('List'):
@@ -96,19 +143,28 @@ def getLangs():
     return languageList         
 
 def readConfig():
-    print ('Reading config')
+    log.debug('Reading config')
     config.read(configini)
     window['opt_languages'].set_value(ast.literal_eval(config.get('Languages', 'opt_languages')))       
-    for o in boolOptions:
-        window['opt_' + o].update(value = config.getboolean('OCRmyPDFoptions', 'opt_' + o)) 
+    for option in pathOptions:
+        newPath = config.get('OCRthyPDFpaths', option)
+        window[option].update(value = newPath)
+        window[option + '_short'].update(value = limitFilenameLen(newPath))
+        # Enable Start button
+        if option != '' and option in ('filename', 'infolder'):
+            window['start_ocr'].update(disabled=False) 
     for o in stringOptions:
         window['opt_' + o].update(value = config.get('OCRmyPDFoptions', 'opt_' + o))
+
           
 def writeConfig():
-    print ('Creating / Updating config')
-    config.set('Languages', 'opt_languages' , repr(window['opt_languages'].get()))
-    for o in boolOptions + stringOptions:
-        config.set('OCRmyPDFoptions', 'opt_' + o, str(window['opt_' + o].get()))
+    log.debug('Creating / Updating config')
+    event, values = window.read(timeout = 0) 
+    config.set('Languages', 'opt_languages' , repr(values['opt_languages']))
+    for option in stringOptions:
+        config.set('OCRmyPDFoptions', 'opt_' + option, str(values['opt_' + option]))
+    for option in pathOptions:
+        config.set('OCRthyPDFpaths', option, str(values[option]))    
     fp=open(configini,'w+')
     config.write(fp)
     fp.close()
@@ -146,6 +202,206 @@ def limitFilenameLen(filename, limit=57):
     else:
         return filename[0:int(limit/2 - 3)] + '...' + filename[x - int(limit/2 - 3):x]  
 
+
+def toggleButtons():
+    #start button
+    if window['start_ocr'].Disabled: 
+        window['start_ocr'].update(disabled=False)
+    else:
+        window['start_ocr'].update(disabled=True)
+    #stop button
+    if window['stop_ocr'].Disabled:
+        window['stop_ocr'].update(disabled=False)
+    else:
+        window['stop_ocr'].update(disabled=True)
+
+def deleteFiles(folder):
+    for file in listdir(folder):
+        remove(path.join(folder, file))
+
+def cleanup(popup=True):
+    #empty queues 
+    while splitJobs.qsize()>0:
+        splitJobs.get()
+    while ocrJobs.qsize()>0:
+        ocrJobs.get()
+
+    global ocrQueueLen, splitQueueLen 
+    ocrQueueLen=0
+    splitQueueLen=0
+    
+    #clean tmpdir
+    deleteFiles(tmpdir.name)    
+    
+    #enable buttons
+    toggleButtons()
+
+    #reset Job
+    Job['file']=''
+    Job['progressValue']= 0
+    Job['complete']=True
+    Job['type']=''
+    Job['running']=False
+    Job['process']=''
+
+    if popup:
+        popUp("All jobs completed")
+
+    #Reset queue bars in case jobs were stopped by user
+    window['ocr_queue_bar'].update(0)
+    window['split_queue_bar'].update(0)
+    log.info('Cleanup complete.')
+    return Job
+
+def startSplitJob (filename):
+    Job['file']=filename
+    Job['progressValue']= 0
+    Job['complete']=False
+    Job['type']='split'
+    
+    args=''
+
+    # Separator
+    args = args + "-s '" + tmpOptions['opt_separator'] + "' "
+  
+    # Sticker Mode
+    if tmpOptions['opt_separatorpage'] == 'Sticker Mode':
+        args = args + '--sticker-mode '
+
+    # Loglevel
+    args = args + "--log " + tmpOptions['opt_loglevel'] + " "
+    
+    #  Output folder
+    args = args + " -o '" + tmpdir.name + "'"
+  
+    commandLine = "'" + scriptRoot + "/splitter.py' '" + Job['file'] + "' " + args
+    log.debug('Commandline: ' + commandLine)
+    execute = shlex.split(commandLine)
+    
+    
+    Job['process'] = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #make STDOUT/readline non-blocking!
+    set_blocking(Job['process'].stdout.fileno(), False)
+    
+    Job['running']=True
+
+    log.info('Split job started: ' + Job['file'])
+    #clear console tab and print command line
+    window['console'].update(value=commandLine + "\n")
+    return Job
+
+def startOCRJob (filename):
+    Job['file']=filename
+    Job['progressValue']= 0
+    Job['complete']=False
+    Job['type']='ocr'
+        
+    args=''
+
+    # Verbose output
+    if tmpOptions['opt_loglevel'] == 'DEBUG':
+        args = args + "-v "
+    # OCR languages
+    for l in tmpOptions['opt_languages']:
+        args = args + "-l " + l + " "
+
+    # ocr strategy --redo-ocr --force-ocr
+    ocrStrat = tmpOptions['opt_ocr']
+    if ocrStrat == "Redo OCR":
+        args=args + "--redo-ocr "
+    elif ocrStrat == "Force OCR":
+        args=args + "--force-ocr "
+    else:
+        args=args + "--skip-text "       
+
+    # clean
+    clean = tmpOptions['opt_noise']
+    if clean == "Clean for OCR but keep original page":
+        args=args + "--clean "
+    elif clean == "Clean for OCR and keep cleaned page":
+        args=args + "--clean-final "
+
+    # sidecar
+    if tmpOptions['opt_sidecar'] == 'yes':
+        args = args + "--sidecar "
+
+    # background
+    if tmpOptions['opt_background'] == 'yes':
+        args = args + "--remove-background "    
+    
+    # deskew
+    if tmpOptions['opt_deskew'] == 'yes':
+        args = args + "--deskew "
+
+    # rotate pages
+    if tmpOptions['opt_rotate'] == 'yes':
+        args = args + "--rotate-pages --rotate-pages-threshold " + str(tmpOptions['opt_confidence']) + " "
+
+    # optimization
+    args=args + "--optimize " + str(tmpOptions['opt_optimization']) + " "
+
+    # output type
+    args=args + "--output-type "
+    outputType = tmpOptions['opt_standard']
+    if outputType == "PDF/A-1b":
+        args=args + "pdfa-1 "
+    elif outputType == "PDF/A-2b":
+        args=args + "pdfa-2 "
+    elif outputType == "PDF/A-3b":
+        args=args + "pdfa-3 "
+    else: 
+        args=args + "pdf "
+
+    inputFilename = path.basename(Job['file'])
+    outFileParts = inputFilename.rsplit('.', 1)
+    outFile = path.join(tmpOptions['outfolder'], outFileParts[0] + tmpOptions['opt_postfix'] + '.' + outFileParts[1])
+    
+    commandLine = "ocrmypdf " + args + "'" + Job['file'] + "' '" + outFile + "'"
+
+    execute = shlex.split(commandLine)
+    log.debug('Commandline: ' + commandLine)
+    Job['process'] = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #make STDOUT/readline non-blocking!
+    set_blocking(Job['process'].stdout.fileno(), False)
+    
+    Job['running']=True
+    log.info('OCR job started' + Job['file'])
+    #clear console tab and print command line
+    window['console'].update(value=commandLine + "\n")
+    return Job
+
+# checks the queues according to their priority and starts the next job
+def nextJob(previousJob=None):
+    
+    # check if split produced files and add to ocrQueue, add original file if not  
+    if previousJob and previousJob['type'] == 'split':
+        for file in glob.glob(tmpdir.name + '/*.pdf'):
+            ocrJobs.put(file)
+        if ocrJobs.qsize() == 0:
+            ocrJobs.put(previousJob['file'])
+ 
+    global ocrQueueLen, splitQueueLen 
+    if ocrJobs.qsize() > ocrQueueLen:
+        ocrQueueLen = ocrJobs.qsize()
+    if splitJobs.qsize() > splitQueueLen:
+        splitQueueLen = splitJobs.qsize()
+    
+    log.debug('Checking queues for next job. OCR queue: ' + ocrQueueLen + ' Split queue:' + splitQueueLen)
+
+    if ocrJobs.qsize() > 0:
+        Job = startOCRJob (ocrJobs.get()) 
+        window['ocr_queue_bar'].update(queuePercent(ocrJobs.qsize(), ocrQueueLen))
+           
+    elif splitJobs.qsize() > 0:      
+        #delete no longer needed split files from temp folder prior to new split job
+        deleteFiles(tmpdir.name)
+        Job = startSplitJob (splitJobs.get())
+        window['split_queue_bar'].update(queuePercent(splitJobs.qsize(), splitQueueLen))
+    else:
+        Job = cleanup()
+        
+    return Job
+
 # Language related
 languages = getLangs()
 languageCodes = { 
@@ -170,9 +426,10 @@ languageCodes = {
     'yo':'yor', 'za':'zha', 'zh':'zho', 'zu':'zul'
 }
 systemLanguage = environ['LANG'][0:2]
+log.debug('System language identified as: ' + systemLanguage)
 
 tab1_layout =   [
-                    [sg.T('Existing text/OCR strategy:'), sg.InputCombo(('Skip pages with text', 'Redo OCR', 'Force OCR', 'Remove ALL text'), default_value='Skip pages with text', key='opt_ocr', tooltip = '"Remove ALL text" will remove transparent AND visible text! Faster if you redo OCR on "image only" PDFs.', enable_events = True)],  
+                    [sg.T('Existing text/OCR strategy:'), sg.InputCombo(('Skip pages with text', 'Redo OCR', 'Force OCR'), default_value='Skip pages with text', key='opt_ocr', enable_events = True)],  
                     [sg.T('Deskew pages (crooked scans):', tooltip = 'Will correct pages scanned at a skewed angle by rotating them back into place.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_deskew', enable_events = True, tooltip = 'Will correct pages scanned at a skewed angle by rotating them back into place.')],
                     [sg.T('Fix page rotation:', tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_rotate', enable_events = True, tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.')],
                     [sg.T('Minimum page rotation confidence:'),sg.Spin(('5','10', '15', '20', '25'),initial_value = '15', key='opt_confidence', size=(2,1),enable_events=True)],
@@ -187,13 +444,12 @@ tab1_layout =   [
 tab2_layout =   [
                     [sg.T('Separator pattern for QR Code (postfix is optional): <Separator_Code>|<Custom_Postfix>')],
                     [sg.T('<Custom_Postfix> is added to the filename in "Sticker Mode" if available')],
+                    [sg.T('It replaces the index numbers -> You need to provide different postfixes for all files.')],
                     [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output', enable_events = True)],                  
-                    [sg.T('Add segment number to filename:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_addpartnumber', tooltip='Set to "No" with Sticker Mode and <Custom_Postfix> to get clean filenames.', enable_events = True)],
                     [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
-                    [sg.T('Loglevel:'), sg.InputCombo(('INFO', 'DEBUG'), default_value='INFO', key='opt_splitterloglevel', enable_events = True)],
-                            
+                                                
                 ]                   
 
 tab3_layout =   [
@@ -205,9 +461,34 @@ tab3_layout =   [
                     ]
                 ]   
 
+colQueue1 = [
+                [
+                    sg.Text('Split Job Queue:', pad = ((0,0),(0,0)))
+                ],
+                [
+                    sg.Text('OCR Job Queue: ', pad = ((0,0),(4,0))) 
+                ]
+            ]   
+
+colQueue2 = [
+                [
+                    sg.ProgressBar(100, key='split_queue_bar', size=(44,20))  
+                ],
+                [
+                    sg.ProgressBar(100, key='ocr_queue_bar', size=(44,20))  
+                ]
+            ]
+
 tab4_layout =   [
                     [
                         sg.Multiline('', key='console', expand_x = True, expand_y = True)
+                    ],
+                    [
+                        sg.T('Loglevel:'), sg.InputCombo(('INFO', 'DEBUG'), default_value='INFO', key='opt_loglevel', enable_events = True)
+                    
+                    ],
+                    [            
+                        sg.Column(colQueue1, vertical_alignment = 't'), sg.Column(colQueue2)      
                     ]
                 ] 
 
@@ -251,7 +532,7 @@ layout = [
             [
                 sg.Column(col1, vertical_alignment = 't'), sg.Column(col2)      
             ],
-            #[sg.Checkbox('Advanced options', key='advanced_options', enable_events=True)],
+            
             [
                 sg.TabGroup([[
                     sg.Tab('Options', tab1_layout), 
@@ -272,17 +553,21 @@ layout = [
 window = sg.Window(applicationTitle  + ' ' + version, layout, font=('Open Sans Semibold', 10, 'normal'), finalize = True)
 
 # Check if config file exists and create one if none exists 
+
 if len(config.read(configini)) == 0:
     makedirs(configPath, exist_ok=True)
     config.add_section('App')
     config.set('App', 'version', version)
     config.add_section('Languages')
     config.add_section('OCRmyPDFoptions')
-   
+    config.add_section('OCRthyPDFpaths')
+
     # Check if system language is available for OCR and set it as additional default
     if systemLanguage in languageCodes: 
         if languageCodes[systemLanguage] in languages:
             window['opt_languages'].set_value(['eng', languageCodes[systemLanguage]])
+    
+    event, values = window.read(timeout=0)
 
     writeConfig()
 else:
@@ -291,67 +576,87 @@ else:
 
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
-    if runningOCR == True:
-        line = p.stdout.readline().decode()
+    if Job['running']==True:
+        line = Job['process'].stdout.readline().decode()
         
         #update console tab
         if line != '':
             window['console'].print(line)
             
-            progressValue += 5
+            Job['progressValue'] += 5
         else:
             #fake some output for long running steps :)
-            progressValue += randint(0,10)
+            Job['progressValue'] += 1 #randint(0,5)
 
         # Animate progress bar
-        if progressValue > 100:
-            progressValue = 0
-        window['progress_bar'].update(progressValue)
+        if Job['progressValue'] > 100:
+            Job['progressValue'] = 0
+        window['progress_bar'].update(Job['progressValue'])
         if event == 'stop_ocr':
             window['console'].print('"Stop OCR" requested')
 
             #Try to stop subprocess with SIGINT - if timeout occurs kill it
             try: 
-                p.send_signal(signal.SIGINT)
-                p.wait(timeout=10)
+                Job['process'].send_signal(signal.SIGINT)
+                Job['process'].wait(timeout=10)
                 window['console'].print('Process was stopped with SIGINT')
             except subprocess.TimeoutExpired:
-                p.kill()
-                p.wait(timeout=10)
+                Job['process'].kill()
+                Job['process'].wait(timeout=10)
                 window['console'].print('Process was killed')
+                             
+        if Job['process'].poll() is not None: 
             
-            print('OCR stopped by user')          
-        if p.poll() is not None: 
-            if p.returncode >= 0:
-                exitMessage = exitCode[p.returncode]
+            if Job['process'].returncode == 0:
+                exitMessage = exitCode[Job['process'].returncode]
                 
+                #reset progress bar
+                window['progress_bar'].update(0)
+            
+                Job = nextJob(Job)
+
+            elif Job['process'].returncode in (1,2,3,4,5,6,7,8,9,10,15,130):
+                exitMessage = exitCode[Job['process'].returncode]  
                 #debug
                 while True:
-                    line = p.stdout.readline().decode()
+                    line = Job['process'].stdout.readline().decode()
                     #update console tab
                     if line != '':
                         window['console'].print(line)
                     else:
                         break
-            else:     
-                exitMessage = "Process terminated by signal"
-            popUp(exitMessage)
+                popUp(exitMessage)
+                Job = cleanup(False)    
+            else:
+                exitMessage = "Process stopped with return code %d\nThis can happen when a subprocess is running.\nNothing to worry about if you have pressed the 'Stop OCR' button."%(Job['process'].returncode)  
+                #debug
+                while True:
+                    line = Job['process'].stdout.readline().decode()
+                    #update console tab
+                    if line != '':
+                        window['console'].print(line)
+                    else:
+                        break
+                popUp(exitMessage)
+                Job = cleanup(False)
+
             window['console'].print(exitMessage)
             #reset progress bar
             window['progress_bar'].update(0)
-            #enable start button
-            window['start_ocr'].update(disabled=False)
-            window['stop_ocr'].update(disabled=True)
-            runningOCR=False
+
         event, values = window.read(timeout = 10)    
     else:
         event, values = window.read() 
     
     if event == sg.WIN_CLOSED: # if user closes window or clicks cancel
-        break
+        break   
     
-    if event.startswith('opt'):
-        writeConfig()
+    # Enable Start button
+    if Job['running'] == False:# and (values['filename'] != '' or values['outfolder'] != ''):
+        window['start_ocr'].update(disabled=True) 
+    # Disable start button if no input selected 
+    if values['filename'] == '' and values['outfolder'] == '':
+        window['start_ocr'].update(disabled=True)     
 
     if event == 'filename' and not values['filename'] == '' : 
         # Shorten filename so it fits in the input text field
@@ -359,14 +664,12 @@ while True:
         # Clear infolder
         window['infolder'].update(value = '')
         window['infolder_short'].update(value = '')
-        # If outfolder is empty set to same folder
-        if window['outfolder'].get() == '':
+        # If outfolder is empty set to same folder as input folder
+        if values['outfolder'] == '':
             inFilePath = path.dirname(values['filename'])
             window['outfolder'].update(value = inFilePath)
             window['outfolder_short'].update(value = limitFilenameLen(inFilePath))
-        # Enable Start button
-        if runningOCR == False:
-            window['start_ocr'].update(disabled=False)   
+
 
     if event == 'infolder' and not values['infolder'] == '' : 
         inFolderPath = values['infolder']
@@ -376,97 +679,41 @@ while True:
         window['filename'].update(value = '')
         window['filename_short'].update(value = '')
         # If outfolder is empty set to same folder
-        if window['outfolder'].get() == '':
+        if values['outfolder'] == '':
             window['outfolder'].update(value =  inFolderPath)
             window['outfolder_short'].update(value = limitFilenameLen( inFolderPath))
-        # Enable Start button
-        if runningOCR == False:
-            window['start_ocr'].update(disabled=False) 
 
     if event == 'outfolder' and not values['outfolder'] == '' : 
         # Shorten filename so it fits in the input text field
         window['outfolder_short'].update(value = limitFilenameLen(values['outfolder'])) 
+       
+    if event.startswith('opt_') or event in pathOptions:
+        writeConfig()
+    
+    if event == 'start_ocr':
+        log.info('OCR queues started')
+        fileList=[]
         
-  
-    if event == 'start_ocr':# oder Länge batch > 0?
-        
-        args=''
-
-        # OCR languages
-        for l in window['opt_languages'].get():
-            args = args + "-l " + l + " "
-
-        # ocr strategy --redo-ocr --force-ocr
-        ocrStrat = window['opt_ocr'].get()
-        if ocrStrat == "Redo OCR":
-            args=args + "--redo-ocr "
-        elif ocrStrat == "Force OCR":
-            args=args + "--force-ocr "
+        if values['filename'] != '':
+            fileList.append(values['filename'])
         else:
-            args=args + "--skip-text "       
-
-        # clean
-        clean = window['opt_noise'].get()
-        if clean == "Clean for OCR but keep original page":
-            args=args + "--clean "
-        elif clean == "Clean for OCR and keep cleaned page":
-            args=args + "--clean-final "
-
-        # sidecar
-        if window['opt_sidecar'].get() == 'yes':
-            args = args + "--sidecar "
-
-        # background
-        if window['opt_background'].get() == 'yes':
-            args = args + "--remove-background "    
+            for file in glob.glob(values['infolder'] + '/*.pdf'):
+                fileList.append(file)
+            for file in glob.glob(values['infolder'] + '/*.PDF'):
+                fileList.append(file)
         
-        # deskew
-        if window['opt_deskew'].get() == 'yes':
-            args = args + "--deskew "
-
-        # rotate pages
-        if window['opt_rotate'].get() == 'yes':
-            args = args + "--rotate-pages --rotate-pages-threshold " + str(window['opt_confidence'].get()) + " "
-
-        # optimization
-        args=args + "--optimize " + str(window['opt_optimization'].get()) + " "
-
-        # output type
-        args=args + "--output-type "
-        outputType = window['opt_standard'].get()
-        if outputType == "PDF/A-1b":
-            args=args + "pdfa-1 "
-        elif outputType == "PDF/A-2b":
-            args=args + "pdfa-2 "
-        elif outputType == "PDF/A-3b":
-            args=args + "pdfa-3 "
+        if values['opt_runsplitter'] == 'yes':
+            fillQueue = splitJobs
         else: 
-            args=args + "pdf "
-#######################    
-# Liste von Dateien erzeugen, die OCRed werden sollen
-# wenn Einzeldatei, dann Liste mit Einzeldatei
-# Wenn Folder, dann Dateinamen übernehmen
-# 
-# While Schleife basteln   
-        # split output filename and add postfix
-        inputFilename = path.basename(window['filename'].get())
-        outFileParts = inputFilename.rsplit('.', 1)
-        outFile = path.join(window['outfolder'].get(), outFileParts[0] + window['opt_postfix'].get() + '.' + outFileParts[1])
-        
-        commandLine = "ocrmypdf -v " + args + "'" + window['filename'].get() + "' '" + outFile + "'"
+            fillQueue = ocrJobs
+            
+        for file in fileList:
+            fillQueue.put(file) 
 
-        execute = shlex.split(commandLine)
-        print('Commandline: ' + commandLine)
-        print(execute)
-        p = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #make STDOUT/readline non-blocking!
-        set_blocking(p.stdout.fileno(), False)
-        progressValue = 0
-        #clear console tab and print command line
-        window['console'].update(value=commandLine + "\n")
-        #disable start button
-        window['start_ocr'].update(disabled=True)
-        #enable stop button
-        window['stop_ocr'].update(disabled=False)
-        runningOCR=True
-###########################
+        #copy values into temporary object to prevent user from changing
+        #options of already running jobs 
+        tmpOptions = deepcopy(values)
+
+        toggleButtons()
+
+        Job = nextJob()   
