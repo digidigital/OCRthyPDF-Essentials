@@ -650,10 +650,10 @@ while True:
     
     if event == sg.WIN_CLOSED: # if user closes window or clicks cancel
         break   
-    
+
     # Enable Start button
-    if Job['running'] == False:# and (values['filename'] != '' or values['outfolder'] != ''):
-        window['start_ocr'].update(disabled=True) 
+    if Job['running'] == False and (values['filename'] != '' or values['outfolder'] != ''):
+        window['start_ocr'].update(disabled=False) 
     # Disable start button if no input selected 
     if values['filename'] == '' and values['outfolder'] == '':
         window['start_ocr'].update(disabled=True)     
