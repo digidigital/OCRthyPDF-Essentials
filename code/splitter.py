@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Version 0.3'''
+#Version 0.3
 import zxing
 import logging
 import argparse
