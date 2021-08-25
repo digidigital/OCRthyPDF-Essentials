@@ -40,7 +40,7 @@ parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEB
 args = parser.parse_args()
 
 log = logging.getLogger('OCRthyPDF')
-loglevel=logging.getLevelName(args.log)
+loglevel=logging.getLevelName(args.log.upper())
 if isinstance(loglevel, int):
     logging.basicConfig(level=loglevel)
 else:
@@ -101,7 +101,7 @@ except Exception:
     
 #set the script root if in Snap environment
 if "SNAP_COMMON" in environ:
-    scriptRoot = environ['SNAP'] + '/Code/code'
+    scriptRoot = environ['SNAP'] + '/code'
 
 # OCRmyPDF Exit codes
 exitCode = { 
