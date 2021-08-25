@@ -386,7 +386,7 @@ def nextJob(previousJob=None):
     if splitJobs.qsize() > splitQueueLen:
         splitQueueLen = splitJobs.qsize()
     
-    log.debug('Checking queues for next job. OCR queue: ' + ocrQueueLen + ' Split queue:' + splitQueueLen)
+    log.debug('Checking queues for next job. OCR queue: ' + str(ocrQueueLen) + ' Split queue:' + str(splitQueueLen))
 
     if ocrJobs.qsize() > 0:
         Job = startOCRJob (ocrJobs.get()) 
