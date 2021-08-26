@@ -52,7 +52,7 @@ background = sg.LOOK_AND_FEEL_TABLE[theme]['BACKGROUND']
 
 #App values
 aboutPage = 'https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/About.md'
-version = '0.6'
+version = '0.6.2'
 applicationTitle = 'OCRthyPDF Essentials'
 
 # Read licenses
@@ -72,12 +72,12 @@ for f in licenses:
 # Config related
 stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
                  'deskew', 'rotate', 'background', 'sidecar', 'runsplitter', 
-                 'separator', 'separatorpage', 'usesourcename', 'loglevel']
+                 'separator', 'separatorpage', 'usesourcename', 'loglevel', 'repair']
 
 pathOptions = ['filename','infolder','outfolder']
 
 configPath = environ['HOME']+'/.config/OCRthyPDF'
-configini = configPath + '/config_0_6_1.ini'
+configini = configPath + '/config_0_6_2.ini'
 config = ConfigParser()
 
 # Other
@@ -261,8 +261,16 @@ def startSplitJob (filename, Job):
     if tmpOptions['opt_separatorpage'] == 'Sticker Mode':
         args = args + '--sticker-mode '
 
+    # Assemble split parts from repaired PDF
+    if tmpOptions['opt_repair'] == 'yes':
+        args = args + '-r '    
+
     # Loglevel
     args = args + "--log " + tmpOptions['opt_loglevel'] + " "
+    
+    # Assemble split parts from repaired PDF
+    if tmpOptions['opt_usesourcename'] == 'no':
+        args = args + '-d ' 
     
     #  Output folder
     args = args + " -o '" + tmpdir.name + "'"
@@ -442,8 +450,9 @@ tab2_layout =   [
                     [sg.T('It replaces the index numbers -> You need to provide different postfixes for all files.')],
                     [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
-                    [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output', enable_events = True)],                  
-                    [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)]                        
+                    [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output.', enable_events = True)],                  
+                    [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
+                    [sg.T('Assemble split files from repaired source file?:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_repair', tooltip='Default: no - Splitter "rewrites" the PDF prior to extracting images but assembles split files from original.', enable_events = True)]                        
                 ]                   
 
 tab3_layout =   [
