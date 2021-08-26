@@ -111,7 +111,9 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                         logger.debug('Converting %s to %s'% (savedImage, newImage))
                         command = shlex.split("gm convert '" + savedImage + "' '" + newImage + "'")
                         try:
-                            subprocess.run(command) 
+                            gmProcess = subprocess.run(command) 
+                            for line in gmProcess.stdout.split('\n'):
+                                logger.debug(line)
                         except:
                             logger.debug('Conversion failed')
                             break
@@ -122,8 +124,9 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                 except:
                     logger.debug('Some error occured while extracting ' + extractedImage)
                     break
+                barcode = reader.decode(savedImage)
                 try:
-                    barcode = reader.decode(savedImage)
+                    print()#debug
                 except: 
                     logger.debug('Decoding barcode failed.')
                     barcode = False
