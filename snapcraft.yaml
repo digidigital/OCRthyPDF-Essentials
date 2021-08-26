@@ -14,7 +14,7 @@ description: |
 license: AGPL-3.0
 icon: gui/ocrthypdf.svg 
 compression: lzo 
-grade: devel # 'stable' 'devel'
+grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
 environment:
