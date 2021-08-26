@@ -109,9 +109,10 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                     if not re.findall("\.(jpg\Z|JPG\Z|png\Z|PNG\Z)", savedImage):
                         newImage = savedImage + '.png'
                         logger.debug('Converting %s to %s'% (savedImage, newImage))
-                        command = shlex.split("gm convert '" + savedImage + "' '" + newImage + "'")
+                        command = shlex.split("gm convert -verbose '" + savedImage + "' '" + newImage + "'")
+                        logger.debug(command)
                         try:
-                            subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)  
+                            subprocess.run(command)  
                             savedImage = newImage
                         except:
                             logger.debug('Conversion failed')
@@ -124,7 +125,8 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                     logger.debug('Some error occured while extracting ' + extractedImage)
                     break
                 try:
-                     barcode = reader.decode(savedImage)
+                    logger.debug('Trying to find barcode in: %s.' % (savedImage)) 
+                    barcode = reader.decode(savedImage)
                 except: 
                     logger.debug('Decoding barcode failed. Most likely the image format is not supported.')
                     barcode = False
