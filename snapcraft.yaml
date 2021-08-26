@@ -22,6 +22,7 @@ environment:
     #LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib/
     GS_LIB: $SNAP/usr/share/ghostscript/9.26/Resource/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/9.26/Resource/Font
+    PATH: $PATH:$SNAP/usr/lib/jvm
     
 apps:
   ocrthypdf:
@@ -62,7 +63,7 @@ parts:
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
     python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust, zxing, pikepdf]
-    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, imagemagick] 
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, imagemagick, openjdk-8-jre] 
     build-packages: [rustc, libxslt-dev]
     override-pull: |
       snapcraftctl pull  
@@ -73,4 +74,3 @@ parts:
     override-prime: |
       snapcraftctl prime
       ln -s ./convert-im6.q16 usr/bin/convert
-      ln -s ./convert-im* usr/bin/convert2
