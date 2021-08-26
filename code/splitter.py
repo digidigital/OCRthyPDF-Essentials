@@ -46,18 +46,23 @@ parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEB
 args = parser.parse_args()
 
 logger = logging.getLogger('splitPDF')
-loglevel=logging.getLevelName(args.log)
+loglevel=logging.getLevelName(args.log.upper())
 if isinstance(loglevel, int):
     logging.basicConfig(level=loglevel)
 else:
     raise ValueError('Invalid log level: %s' % loglevel)
+
+if args.log.upper() == "DEBUG":
+    gsQuiet=''
+else:
+    gsQuiet=' -q '
 
 def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dropName=False, noRepair=False):
        
     logger.info('Rewriting PDF.')
     tempSourceDir=TemporaryDirectory()
     analyseThis= tempSourceDir.name + "/repaired.pdf"
-    command = shlex.split("gs -o " + analyseThis + " -sDEVICE=pdfwrite   -dPDFSETTINGS=/prepress '" + filename + "'")
+    command = shlex.split("gs -o " + analyseThis + gsQuiet + " -dNOPAUSE -sDEVICE=pdfwrite   -dPDFSETTINGS=/prepress '" + filename + "'")
     logger.debug(command)     
     try:    
         subprocess.run(command) 
@@ -66,10 +71,6 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
         sys.exit("Unable to start repair step. Is Ghostscript installed?")
 
     sourcePDF = Pdf.open(analyseThis)
-    try:
-        print()
-    except:
-        sys.exit("Unable to open source PDF.")
  
     reader = zxing.BarCodeReader()
 
