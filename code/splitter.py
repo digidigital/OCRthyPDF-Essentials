@@ -124,13 +124,14 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                 except:
                     logger.debug('Some error occured while extracting ' + extractedImage)
                     break
-                try:
-                    logger.debug('Trying to find barcode in: %s.' % (savedImage)) 
-                    barcode = reader.decode(savedImage)
-                except: 
-                    logger.debug('Decoding barcode failed. Most likely the image format is not supported.')
-                    barcode = False
-                    break
+              #  try:
+                logger.debug('Trying to find barcode in: %s' % (savedImage)) 
+                barcode = reader.decode(savedImage)
+                logger.debug('After reader.decode')
+               # except: 
+               #    logger.debug('Decoding barcode failed. Most likely the image format is not supported.')
+               #    barcode = False
+               #   break
                 if barcode:
                     logger.info('QR-Code / Barcode containing text "%s" found on page %d' % (barcode.parsed, pageNumber+1))
                     barcodeComponents = barcode.parsed.split('|',1)

@@ -102,7 +102,7 @@ if "SNAP_COMMON" in environ:
 
 # OCRmyPDF Exit codes
 exitCode = { 
-    0 : 'OCR completed.',
+    0 : 'Returncode 0. Job completed.',
     1 : 'Invalid arguments, exited with an error.',
     2 : 'The input file does not seem to be a valid PDF.',
     3 : 'An external program required by OCRmyPDF is missing.',
