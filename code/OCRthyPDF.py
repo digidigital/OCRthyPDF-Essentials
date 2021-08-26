@@ -40,7 +40,7 @@ parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEB
 args = parser.parse_args()
 
 log = logging.getLogger('OCRthyPDF')
-loglevel=logging.getLevelName(args.log.upper())
+loglevel=logging.getLevelName(args.log)
 if isinstance(loglevel, int):
     logging.basicConfig(level=loglevel)
 else:

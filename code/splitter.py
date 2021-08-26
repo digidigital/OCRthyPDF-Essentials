@@ -111,24 +111,22 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                         logger.debug('Converting %s to %s'% (savedImage, newImage))
                         command = shlex.split("gm convert '" + savedImage + "' '" + newImage + "'")
                         try:
-                            gmProcess = subprocess.run(command) 
-                            for line in gmProcess.stdout.split('\n'):
-                                logger.debug(line)
+                            subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)  
+                            savedImage = newImage
                         except:
                             logger.debug('Conversion failed')
                             break
-                        savedImage = newImage
+                       
                 except NotImplementedError:
                     logger.debug('Unable to extract image: ' + extractedImage + ' - Not implemented')
                     break
                 except:
                     logger.debug('Some error occured while extracting ' + extractedImage)
                     break
-                barcode = reader.decode(savedImage)
                 try:
-                    print()#debug
+                     barcode = reader.decode(savedImage)
                 except: 
-                    logger.debug('Decoding barcode failed.')
+                    logger.debug('Decoding barcode failed. Most likely the image format is not supported.')
                     barcode = False
                     break
                 if barcode:
@@ -148,11 +146,11 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
     logger.info('Analysis completed: %d separators found on %d pages in %d images.'%(len(separatorPages),pageNumber,totalImages))
 
     if args.repair:
+        logger.info('Pages will be copied from repaired PDF.')
+    else:
         logger.info('Pages will be copied from original PDF.')
         sourcePDF.close()
         sourcePDF = Pdf.open(filename)
-    else:
-        logger.info('Pages will be copied from repaired PDF.')
         
     #Separator pages start new segment and will be kept 
     if stickerMode == True and len(separatorPages)>0:
