@@ -109,7 +109,7 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
                     if not re.findall("\.(jpg\Z|JPG\Z|png\Z|PNG\Z)", savedImage):
                         newImage = savedImage + '.png'
                         logger.debug('Converting %s to %s'% (savedImage, newImage))
-                        command = shlex.split("gm convert -verbose '" + savedImage + "' '" + newImage + "'")
+                        command = shlex.split("convert -verbose '" + savedImage + "' '" + newImage + "'")
                         logger.debug(command)
                         try:
                             subprocess.run(command)  

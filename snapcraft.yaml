@@ -62,7 +62,7 @@ parts:
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
     python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust, zxing, pikepdf]
-    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, graphicsmagick] 
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, imagemagick] 
     build-packages: [rustc, libxslt-dev]
     override-pull: |
       snapcraftctl pull  
@@ -70,3 +70,6 @@ parts:
     override-build: |
       snapcraftctl build
       sed -i 's/find_library(libname)/"liblept.so.5"/g' $SNAPCRAFT_PART_INSTALL/lib/python3.6/site-packages/ocrmypdf/leptonica.py
+    override-prime: |
+      snapcraftctl prime
+      ln -s usr/bin/*convert-im* usr/bin/convert
