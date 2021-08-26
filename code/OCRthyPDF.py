@@ -288,7 +288,8 @@ def startSplitJob (filename, Job):
 
     log.info('Split job started: ' + Job['file'])
     #clear console tab and print command line
-    window['console'].update(value=commandLine + "\n")
+    #window['console'].update(value=commandLine + "\n")
+    window['console'].print(line)
     return Job
 
 def startOCRJob (filename, Job):
@@ -367,7 +368,8 @@ def startOCRJob (filename, Job):
     Job['running']=True
     log.info('OCR job started' + Job['file'])
     #clear console tab and print command line
-    window['console'].update(value=commandLine + "\n")
+    #window['console'].update(value=commandLine + "\n")
+    window['console'].print(line)
     return Job
 
 # checks the queues according to their priority and starts the next job
