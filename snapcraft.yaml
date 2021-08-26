@@ -62,39 +62,11 @@ parts:
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
     python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust, zxing, pikepdf]
-    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, imagemagick] 
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, graphicsmagick] 
     build-packages: [rustc, libxslt-dev]
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
-    override-prime: |
-      set \
-        -o errexit \
-        -o nounset
-      snapcraftctl prime
-      # Create canonical commands for ImageMagick
-      canonical_command=
-      for image_magick_command in usr/bin/*-im?; do
-        canonical_command="$(
-          printf -- \
-            "${image_magick_command}" \
-            | sed \
-              's/-im.*$//'
-        )"
-        # HACK: Make symbolic link point to symbolic link without using `ln`'s `--relative`, which always dereferences TARGET for some reason :-/
-        image_magick_command="$(
-          printf -- \
-            "${image_magick_command}" \
-            | sed \
-              's/^.*\///'
-        )"
-        ln \
-          --force \
-          --symbolic \
-          --verbose \
-          "${image_magick_command}" \
-          "${canonical_command}"
-      done
     override-build: |
       snapcraftctl build
       sed -i 's/find_library(libname)/"liblept.so.5"/g' $SNAPCRAFT_PART_INSTALL/lib/python3.6/site-packages/ocrmypdf/leptonica.py
