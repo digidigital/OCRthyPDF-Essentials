@@ -77,7 +77,7 @@ stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confide
 pathOptions = ['filename','infolder','outfolder']
 
 configPath = environ['HOME']+'/.config/OCRthyPDF'
-configini = configPath + '/config_0_6.ini'
+configini = configPath + '/config_0_6_1.ini'
 config = ConfigParser()
 
 # Other
@@ -89,9 +89,6 @@ Job={'running': False}
 tmpdir = TemporaryDirectory()
 
 log.debug('Temporary directory: ' + tmpdir.name)
-
-ocrQueueLen=0
-splitQueueLen=0
 
 # Needed for pyinstaller onefile...
 try:
@@ -219,16 +216,15 @@ def deleteFiles(folder):
     for file in listdir(folder):
         remove(path.join(folder, file))
 
-def cleanup(popup=True):
+def cleanup(Job, popup=True):
     #empty queues 
     while splitJobs.qsize()>0:
         splitJobs.get()
     while ocrJobs.qsize()>0:
         ocrJobs.get()
 
-    global ocrQueueLen, splitQueueLen 
-    ocrQueueLen=0
-    splitQueueLen=0
+    Job['ocrQueueLen']=0
+    Job['splitQueueLen']=0
     
     #clean tmpdir
     deleteFiles(tmpdir.name)    
@@ -238,8 +234,6 @@ def cleanup(popup=True):
 
     #reset Job
     Job['file']=''
-    Job['progressValue']= 0
-    Job['complete']=True
     Job['type']=''
     Job['running']=False
     Job['process']=''
@@ -253,10 +247,9 @@ def cleanup(popup=True):
     log.info('Cleanup complete.')
     return Job
 
-def startSplitJob (filename):
+def startSplitJob (filename, Job):
     Job['file']=filename
-    Job['progressValue']= 0
-    Job['complete']=False
+    Job['progressValue']=0
     Job['type']='split'
     
     args=''
@@ -290,10 +283,9 @@ def startSplitJob (filename):
     window['console'].update(value=commandLine + "\n")
     return Job
 
-def startOCRJob (filename):
+def startOCRJob (filename, Job):
     Job['file']=filename
-    Job['progressValue']= 0
-    Job['complete']=False
+    Job['progressValue']=0
     Job['type']='ocr'
         
     args=''
@@ -379,26 +371,29 @@ def nextJob(previousJob=None):
             ocrJobs.put(file)
         if ocrJobs.qsize() == 0:
             ocrJobs.put(previousJob['file'])
- 
-    global ocrQueueLen, splitQueueLen 
-    if ocrJobs.qsize() > ocrQueueLen:
-        ocrQueueLen = ocrJobs.qsize()
-    if splitJobs.qsize() > splitQueueLen:
-        splitQueueLen = splitJobs.qsize()
     
-    log.debug('Checking queues for next job. OCR queue: ' + str(ocrQueueLen) + ' Split queue:' + str(splitQueueLen))
+    if not previousJob:
+        log.info('Creating first job.')
+        previousJob={'running': False, 'ocrQueueLen' : 0, 'splitQueueLen' : 0}
+    
+    if ocrJobs.qsize() > previousJob['ocrQueueLen']:
+        previousJob['ocrQueueLen'] = ocrJobs.qsize()
+    if splitJobs.qsize() > previousJob['splitQueueLen']:
+        previousJob['splitQueueLen'] = splitJobs.qsize()   
+
+    log.debug('Checking queues for next job. OCR-queue: ' + str(ocrJobs.qsize()) + ', Split-queue:' + str(splitJobs.qsize()))
 
     if ocrJobs.qsize() > 0:
-        Job = startOCRJob (ocrJobs.get()) 
-        window['ocr_queue_bar'].update(queuePercent(ocrJobs.qsize(), ocrQueueLen))
+        Job = startOCRJob (ocrJobs.get(), previousJob) 
+        window['ocr_queue_bar'].update(queuePercent(ocrJobs.qsize(), previousJob['ocrQueueLen']))
            
     elif splitJobs.qsize() > 0:      
         #delete no longer needed split files from temp folder prior to new split job
         deleteFiles(tmpdir.name)
-        Job = startSplitJob (splitJobs.get())
-        window['split_queue_bar'].update(queuePercent(splitJobs.qsize(), splitQueueLen))
+        Job = startSplitJob (splitJobs.get(), previousJob)
+        window['split_queue_bar'].update(queuePercent(splitJobs.qsize(), previousJob['splitQueueLen']))
     else:
-        Job = cleanup()
+        Job = cleanup(previousJob)
         
     return Job
 
@@ -448,8 +443,7 @@ tab2_layout =   [
                     [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output', enable_events = True)],                  
-                    [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
-                                                
+                    [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)]                        
                 ]                   
 
 tab3_layout =   [
@@ -626,7 +620,7 @@ while True:
                     else:
                         break
                 popUp(exitMessage)
-                Job = cleanup(False)    
+                Job = cleanup(Job, popup=False)    
             else:
                 exitMessage = "Process stopped with return code %d\nThis can happen when a subprocess is running.\nNothing to worry about if you have pressed the 'Stop OCR' button."%(Job['process'].returncode)  
                 #debug
@@ -638,7 +632,7 @@ while True:
                     else:
                         break
                 popUp(exitMessage)
-                Job = cleanup(False)
+                Job = cleanup(Job, popup=False)
 
             window['console'].print(exitMessage)
             #reset progress bar
