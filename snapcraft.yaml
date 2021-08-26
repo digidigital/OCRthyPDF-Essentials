@@ -62,31 +62,11 @@ parts:
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
     source-type: git
     python-packages: [PySimpleGUI, ocrmypdf, setuptools-rust, zxing, pikepdf]
-    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g] 
+    stage-packages: [python3-tk, tcl, ghostscript, icc-profiles-free, liblept5, libxml2, pngquant, tesseract-ocr-all, unpaper, qpdf, zlib1g, imagemagick] 
     build-packages: [rustc, libxslt-dev]
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
-    override-build: |
-      snapcraftctl build
-      sed -i 's/find_library(libname)/"liblept.so.5"/g' $SNAPCRAFT_PART_INSTALL/lib/python3.6/site-packages/ocrmypdf/leptonica.py
-
-  # Launcher programs to fix problems at runtime
-  launchers:
-    source: launchers
-    plugin: dump
-    organize:
-      '*-launch': bin/
-
-  imagemagick:
-    source: launchers
-    plugin: dump
-    stage-packages:
-    - imagemagick
-
-    organize:
-      '*-launch': bin/
-
     override-prime: |
       set \
         -o errexit \
@@ -115,3 +95,6 @@ parts:
           "${image_magick_command}" \
           "${canonical_command}"
       done
+    override-build: |
+      snapcraftctl build
+      sed -i 's/find_library(libname)/"liblept.so.5"/g' $SNAPCRAFT_PART_INSTALL/lib/python3.6/site-packages/ocrmypdf/leptonica.py
