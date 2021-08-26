@@ -72,4 +72,5 @@ parts:
       sed -i 's/find_library(libname)/"liblept.so.5"/g' $SNAPCRAFT_PART_INSTALL/lib/python3.6/site-packages/ocrmypdf/leptonica.py
     override-prime: |
       snapcraftctl prime
-      ln -s convert-im* usr/bin/convert
+      ln -s ./convert-im6.q16 usr/bin/convert
+      ln -s ./convert-im* usr/bin/convert2
