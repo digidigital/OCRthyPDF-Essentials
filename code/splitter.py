@@ -6,6 +6,7 @@ import argparse
 import re
 import subprocess
 import shlex
+import sys
 
 from tempfile import TemporaryDirectory
 from pikepdf import Pdf, PdfImage, Page, PdfError, _cpphelpers 
@@ -35,6 +36,8 @@ parser.add_argument('-s', '--separator', type=str, default="NEXT",
                     help='Barcode text used to find separator pages. Default: NEXT')
 parser.add_argument('--sticker-mode', action='store_true',
                     help='New PDF-Seqment starts at QR-Code (Page will be kept). Add custom postfix to barcode content by using | as delimiter')
+parser.add_argument('-r', '--repair', action='store_true',
+                    help='Split a repaired version of the source PDF.')
 parser.add_argument('-o', '--output-folder', metavar='/path/to/output/folder', type=str, 
                     help='Where to save the split files? Default: Same as input folder')
 parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEBUG'],
@@ -49,14 +52,31 @@ if isinstance(loglevel, int):
 else:
     raise ValueError('Invalid log level: %s' % loglevel)
 
-def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dropname=False):
-    sourcePDF = Pdf.open(filename)
+def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dropName=False, noRepair=False):
+       
+    logger.info('Rewriting PDF.')
+    tempSourceDir=TemporaryDirectory()
+    analyseThis= tempSourceDir.name + "/repaired.pdf"
+    command = shlex.split("gs -o " + analyseThis + " -sDEVICE=pdfwrite   -dPDFSETTINGS=/prepress '" + filename + "'")
+    logger.debug(command)     
+    try:    
+        subprocess.run(command) 
+    except:
+        logger.debug('Repair failed')
+        sys.exit("Unable to start repair step. Is Ghostscript installed?")
+
+    sourcePDF = Pdf.open(analyseThis)
+    try:
+        print()
+    except:
+        sys.exit("Unable to open source PDF.")
+ 
     reader = zxing.BarCodeReader()
 
     if not outpath:
         outpath=path.dirname(filename)
 
-    if dropname == True:
+    if dropName == True:
         sourceName = ''
     else:
         sourceName = path.basename(filename).split('.',1)[0]+'_'
@@ -123,6 +143,13 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
     
     logger.info('Analysis completed: %d separators found on %d pages in %d images.'%(len(separatorPages),pageNumber,totalImages))
 
+    if args.repair:
+        logger.info('Pages will be copied from original PDF.')
+        sourcePDF.close()
+        sourcePDF = Pdf.open(filename)
+    else:
+        logger.info('Pages will be copied from repaired PDF.')
+        
     #Separator pages start new segment and will be kept 
     if stickerMode == True and len(separatorPages)>0:
         logger.info('Assembling PDFs in "Sticker Mode"')
@@ -196,7 +223,9 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
             
             startPage=endPage+1
             fileIndex+=1
-
+    
+    sourcePDF.close()
+  
     if len(fileList) > 0:
         return fileList 
     else:
@@ -204,4 +233,4 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
 
 if __name__ == "__main__":
 
-    print(str(splitPDF (args.filename, args.output_folder, args.separator, args.sticker_mode, args.drop_filename)))
+    print(str(splitPDF (args.filename, args.output_folder, args.separator, args.sticker_mode, args.drop_filename, args.repair)))
