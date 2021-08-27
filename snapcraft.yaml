@@ -22,7 +22,7 @@ environment:
     #LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib/
     GS_LIB: $SNAP/usr/share/ghostscript/9.26/Resource/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/9.26/Resource/Font
-    PATH: $PATH:$SNAP/usr/lib/jvm
+    PATH: $PATH:$SNAP/usr/lib/jvm/java-8-openjdk-amd64/bin
     
 apps:
   ocrthypdf:
