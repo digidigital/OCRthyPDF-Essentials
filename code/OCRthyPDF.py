@@ -287,9 +287,12 @@ def startSplitJob (filename, Job):
     Job['running']=True
 
     log.info('Split job started: ' + Job['file'])
-    #clear console tab and print command line
-    #window['console'].update(value=commandLine + "\n")
-    window['console'].print(commandLine)
+    
+    if window['tmp_log'].get() == 'yes': 
+        window['console'].update(value=commandLine + "\n")
+    else:
+        window['console'].print(commandLine)
+    
     return Job
 
 def startOCRJob (filename, Job):
@@ -367,9 +370,12 @@ def startOCRJob (filename, Job):
     
     Job['running']=True
     log.info('OCR job started' + Job['file'])
-    #clear console tab and print command line
-    #window['console'].update(value=commandLine + "\n")
-    window['console'].print(commandLine)
+    
+    if window['tmp_log'].get() == 'yes': 
+        window['console'].update(value=commandLine + "\n")
+    else:
+        window['console'].print(commandLine)
+    
     return Job
 
 # checks the queues according to their priority and starts the next job
@@ -489,7 +495,8 @@ tab4_layout =   [
                         sg.Multiline('', key='console', expand_x = True, expand_y = True)
                     ],
                     [
-                        sg.T('Loglevel:'), sg.InputCombo(('INFO', 'DEBUG'), default_value='INFO', key='opt_loglevel', enable_events = True)
+                        sg.T('Loglevel:'), sg.InputCombo(('INFO', 'DEBUG'), default_value='INFO', key='opt_loglevel', enable_events = True),
+                        sg.T('Limit console to display last job only?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='tmp_log', enable_events = True),
                     
                     ],
                     [            
@@ -518,17 +525,17 @@ col2 =  [
             [
                 sg.InputText(key='filename_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='filename', visible=False,  readonly=True, enable_events=True), 
-                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF"),),)
+                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")),)
             ],
             [
                 sg.InputText(key='infolder_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='infolder', visible=False,  readonly=True, enable_events=True), 
-                sg.FolderBrowse(('Browse'))
+                sg.FolderBrowse(('Browse'), key='infolder_browse')
             ],
             [
                 sg.InputText(key='outfolder_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='outfolder', visible=False,  readonly=True, enable_events=True), 
-                sg.FolderBrowse(('Browse'))
+                sg.FolderBrowse(('Browse'), key='outfolder_browse')
             ]
         ]
 
@@ -675,7 +682,6 @@ while True:
             window['outfolder'].update(value = inFilePath)
             window['outfolder_short'].update(value = limitFilenameLen(inFilePath))
 
-
     if event == 'infolder' and not values['infolder'] == '' : 
         inFolderPath = values['infolder']
         # Shorten filename so it fits in the input text field
@@ -694,6 +700,14 @@ while True:
        
     if event.startswith('opt_') or event in pathOptions:
         writeConfig()
+        # 'Hack' to prevent user to get stuck in snap home. Sett initial folder for browsing to user's home,  
+        if "SNAP_COMMON" in environ:    
+            for checkFolder in ('infolder' , 'outfolder'):
+                if values[checkFolder] == '/':
+                    newInitial = environ['HOME']
+                else:
+                    newInitial = values[checkFolder]
+                setattr(window[checkFolder + '_browse'], 'InitialFolder', newInitial)
     
     if event == 'start_ocr':
         log.info('OCR queues started')
@@ -722,3 +736,5 @@ while True:
         toggleButtons()
 
         Job = nextJob()   
+    
+  
