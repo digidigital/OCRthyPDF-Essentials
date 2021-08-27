@@ -23,6 +23,7 @@ environment:
     GS_LIB: $SNAP/usr/share/ghostscript/9.26/Resource/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/9.26/Resource/Font
     PATH: $PATH:$SNAP/usr/lib/jvm/java-8-openjdk-amd64/bin
+    SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
     
 apps:
   ocrthypdf:
