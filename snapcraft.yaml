@@ -74,5 +74,4 @@ parts:
     override-prime: |
       snapcraftctl prime
       ln -s ./convert-im6.q16 usr/bin/convert
-      rm usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
-      ln -s  /etc/ssl/certs/java/cacerts /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
+      ln -sf etc/ssl/certs/java/cacerts usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
