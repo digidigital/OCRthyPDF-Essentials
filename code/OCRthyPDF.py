@@ -700,7 +700,7 @@ while True:
        
     if event.startswith('opt_') or event in pathOptions:
         writeConfig()
-        # 'Hack' to prevent user to get stuck in snap home. Sett initial folder for browsing to user's home,  
+        # 'Hack' to prevent user to get stuck in snap home. Set initial folder for browsing to user's home,  
         if "SNAP_COMMON" in environ:    
             for checkFolder in ('infolder' , 'outfolder'):
                 if values[checkFolder] == '/':
