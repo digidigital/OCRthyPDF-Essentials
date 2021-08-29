@@ -35,7 +35,7 @@ to the filename.""")
 def analyzePage(PDF, pageNumber, separator):
     reader = zxing.BarCodeReader()
     separatorCode=None
-    logger.debug('Analyzing page: %d'% (pageNumber+1))
+    logger.info('Analyzing page: %d'% (pageNumber+1))
        
     with TemporaryDirectory() as temp_dir:
         
@@ -48,9 +48,9 @@ def analyzePage(PDF, pageNumber, separator):
                 logger.debug('Saved as: ' + savedImage)
                 #If image not JPG or PNG convert to PNG
                 if not re.findall("\.(jpg\Z|JPG\Z|png\Z|PNG\Z)", savedImage):
-                    newImage = savedImage + '.png'
+                    newImage = savedImage + '.jpg'
                     logger.debug('Converting %s to %s'% (savedImage, newImage))
-                    command = shlex.split("convert -verbose '" + savedImage + "' '" + newImage + "'")
+                    command = shlex.split("convert -verbose -quality 100% '" + savedImage + "' '" + newImage + "'")
                     logger.debug(command)
                     try:
                         subprocess.run(command)  
@@ -128,14 +128,14 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
     tempSourceDir=TemporaryDirectory()
     rewrittenPDF= tempSourceDir.name + "/repaired.pdf"
     
-    command = shlex.split("gs -o " + rewrittenPDF + gsQuiet + " -sDEVICE=pdfwrite   -dPDFSETTINGS=/prepress '" + filename + "'")
+    command = shlex.split("gs -o " + rewrittenPDF + gsQuiet + " -sDEVICE=pdfwrite  -dPDFSETTINGS=/prepress '" + filename + "'")
    
     logger.debug(command)     
     try:  
         subprocess.run(command) 
     except:
-        logger.debug('Repair failed')
-        sys.exit("Unable to start repair step. Is Ghostscript installed?")
+        logger.debug('Rewriting failed')
+        sys.exit("Unable to start rewrite step. Is Ghostscript installed?")
      
     sourcePDF = Pdf.open(rewrittenPDF)
  
@@ -168,7 +168,7 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
             tempPDF.pages.append(page)
             pageCollection.append(tempPDF)
         
-        max_workers=cpu_count()/2
+        max_workers=int(cpu_count()*2/3)
 
         logger.info('Analyzing pages with %d workers' % (max_workers))
         with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
