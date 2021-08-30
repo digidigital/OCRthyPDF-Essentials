@@ -168,7 +168,7 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
             tempPDF.pages.append(page)
             pageCollection.append(tempPDF)
         
-        max_workers=int(cpu_count()*2/3)
+        max_workers=round((cpu_count()*2/3),0)
 
         logger.info('Analyzing pages with %d workers' % (max_workers))
         with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
