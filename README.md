@@ -33,5 +33,6 @@ or
 <code>ocrthypdf --log DEBUG</code> 
 in order to get more info in case the application does not work as expected.
 
-Info about subprocesses like OCRmyPDF, Splitter, Ghostscript, etc. is displayed in the console tab. Set 'Loglevel' to DEBUG and 'Limit console ...' to 'no'. 
+Info about subprocesses like OCRmyPDF, Splitter, Ghostscript, etc. is displayed in the console tab. Set 'Loglevel' to DEBUG and 'Limit console ...' to 'no' for detailed information. 
 
+Still no clue what went wrong? Report an issue [here](https://github.com/digidigital/OCRthyPDF-Essentials/issues).
