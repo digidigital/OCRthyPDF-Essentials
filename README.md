@@ -35,14 +35,16 @@ in order to get more info in case the application does not work as expected.
 
 Info about subprocesses like OCRmyPDF, Splitter, Ghostscript, etc. is displayed in the console tab. Set 'Loglevel' to DEBUG and 'Limit console ...' to 'no' for detailed information. 
 
-Still no clue what went wrong? Report an issue [here](https://github.com/digidigital/OCRthyPDF-Essentials/issues).
+:pushpin: Still no clue what went wrong? Report an issue [here](https://github.com/digidigital/OCRthyPDF-Essentials/issues).
 
 # How To Use It
 ![OCRthyPDF GUI Options-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/1.png)
 
 First you need to select a single PDF **or** a folder containing PDF files that should be processed by OCRmyPDF's character recognition. Then you specify a folder where the new PDFs will be saved. If no output folder is selected, the input folder ist set as output folder as well.
 
-The switches in the "Options"-Tab represent the values as described in [OCRmyPDF's cookbook](https://ocrmypdf.readthedocs.io/en/v12.3.3/cookbook.html) and work exactly the same. Not all combinations make sense or are allowed. OCRthyPDF does not stop you from setting such combinations. In most cases the OCR will simply refuse to start or stop with an error message. Please check the "Console"-Tab for detailed information on what went wrong. If you leave the postfix field empty and the output is written in the input folder you will overwrite your source file!:facepalm:
+The switches in the "Options" tab correspond to the values described in the [OCRmyPDF's cookbook](https://ocrmypdf.readthedocs.io/en/v12.3.3/cookbook.html) and work exactly the same way. Not all combinations are useful or allowed. OCRthyPDF does not prevent you from setting such combinations. In most cases, OCR will simply refuse to start or abort with an error message. See the Console tab for detailed information about what went wrong. 
+
+:pushpin: Caution: If you leave the postfix field blank and the output is written to the input folder, you will overwrite your source file! :facepalm:
 
 Start the OCR with the "Start OCR" button. You can press the "Stop OCR" button to stop all running OCR jobs.
 
@@ -63,11 +65,11 @@ You can download standard QR-Codes with text "NEXT" [here](https://github.com/di
 You can use the pattern <SEPARATOR_TEXT>|<CUSTOM_POSTFIX> in your QR-Code to add a custom postfix to the filename by using Sticker Mode. Use individual 
 postfixes in each code since no segment numbers are added in this mode if a custom postfix is found. 
 
-Examples for useful QR-Codes in Sticker Mode:
+:pushpin: Examples for useful QR-Codes in Sticker Mode:
 - NEXT|CoverLetter - NEXT|Attachments 
 - NEXT|CoverLetter_Miller - NEXT|CoverLetter_Smith
 
-If you select the option not to use the source filename in the output filename you are able to set the filenames by using the custom postfixes (if you leave the postfix field in the options tab blank). 
+:pushpin: If you select the option not to use the source filename in the output filename you are able to set the filenames by using the custom postfixes (if you leave the postfix field in the options tab blank). 
 
 Before Splitter starts analyzing the pages of a PDF file, the source PDF file is rewritten with Ghostscript to work around some common problems with PDF files created by scanners/MFPs. Splitter looks for QR codes in the rewritten file, but assembles the split files directly from the source file. You can use the "Assemble split files from rewritten source file?" option to tell Splitter to take the pages from the rewritten/repaired version. If you are splitting scanned documents that contain bitmap images, this should be safe. If you split documents that contain other elements (text, fonts, vector drawings, etc.), the result may differ from the source!
 
