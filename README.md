@@ -1,13 +1,9 @@
 # OCRthyPDF-Essentials
 Make your PDF files text-searchable (A GUI for [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/))
 
-This is a user interface for the command line tool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/). 
-
-It's main purpose is to provide users that are not used to command line tools access to OCRmyPDF's basic features.  
+It started with the idea to provide users that are not used to command line tools access to OCRmyPDF's basic features.  
 
 ![OCRthyPDF GUI](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/1.png)
-
-You can use it to make PDF files that contain images with text (e. g. after scanning) searchable by adding an invisible text layer.
 
 It supports more than 100 languages "out-of-the-box" (all languages that are installed with tesseract).
 
