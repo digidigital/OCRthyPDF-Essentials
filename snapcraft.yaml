@@ -76,3 +76,12 @@ parts:
       snapcraftctl prime
       ln -s ./convert-im6.q16 usr/bin/convert
       ln -sf ../../../../../../../etc/ssl/certs/java/cacerts usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
+
+layout:
+  /etc/ImageMagick-6:
+    bind: $SNAP_DATA/etc/ImageMagick-6
+  /ramtmp:
+    type: tmpfs
+    user: nobody
+    group: nobody
+    mode: 1777
