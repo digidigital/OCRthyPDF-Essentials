@@ -80,8 +80,3 @@ parts:
 layout:
   /etc/ImageMagick-6:
     bind: $SNAP/etc/ImageMagick-6
-  /ramtmp:
-    type: tmpfs
-    user: nobody
-    group: nobody
-    mode: 1777
