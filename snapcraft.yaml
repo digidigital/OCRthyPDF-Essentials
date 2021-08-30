@@ -41,14 +41,7 @@ apps:
       - wayland
       - unity7
       - x11
-
-  ocrthypdf-splitter:
-    command: bin/snapcraft-preload python3 $SNAP/code/splitter.py
-    command-chain: [bin/debian-multiarch-triplet-provider-launch]
-    plugs:
-      - home
-      - removable-media
-      
+     
 parts:
   get-source:
     plugin: dump
