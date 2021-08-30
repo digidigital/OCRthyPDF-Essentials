@@ -22,9 +22,11 @@ environment:
     #LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib/
     GS_LIB: $SNAP/usr/share/ghostscript/9.26/Resource/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/9.26/Resource/Font
-    PATH: $PATH:$SNAP/usr/lib/jvm/java-8-openjdk-amd64/bin
+    PATH: $PATH:$SNAP/usr/lib/jvm/java-8-openjdk-amd64/bin:$SNAP/usr/lib/x86_64-linux-gnu/ImageMagick-6.9.7
     SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
-    
+    MAGICK_HOME: $SNAP/usr/lib/x86_64-linux-gnu/ImageMagick-6.9.7
+    MAGICK_CODER_MODULE_PATH: $SNAP/usr/lib/x86_64-linux-gnu/ImageMagick-6.9.7/modules-Q16/coders
+
 apps:
   ocrthypdf:
     command: bin/snapcraft-preload python3 $SNAP/code/OCRthyPDF.py
