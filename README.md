@@ -44,7 +44,11 @@ First you need to select a single PDF **or** a folder containing PDF files that 
 
 The switches in the "Options"-Tab represent the values as described in [OCRmyPDF's cookbook](https://ocrmypdf.readthedocs.io/en/v12.3.3/cookbook.html) and work exactly the same. Not all combinations make sense or are allowed. OCRthyPDF does not stop you from setting such combinations. In most cases the OCR will simply refuse to start or stop with an error message. Please check the "Console"-Tab for detailed information on what went wrong. If you leave the postfix field empty and the output is written in the input folder you will overwrite your source file!:facepalm:
 
-![OCRthyPDF GUI](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/2.png)
+Start the OCR with the "Start OCR" button. You can press the "Stop OCR" button to stop all running OCR jobs.
+
+The activity indicator bar flashes while OCR is running.
+
+![OCRthyPDF GUI Splitter-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/2.png)
 
 The splitter enables you to split a PDF-file into separate files based on a separator barcode / QR-Code. This is very handy if you have to scan a lot of (multi-page) documents and don't want to scan each document separately. Just put a [separator page](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) between each document and scan them at once! 
 
@@ -65,4 +69,14 @@ Examples for useful QR-Codes in Sticker Mode:
 
 If you select the option not to use the source filename in the output filename you are able to set the filenames by using the custom postfixes (if you leave the postfix field in the options tab blank). 
 
-Before splitter starts to analyze the pages of a PDF file the source PDF is rewritten with Ghostscript in order to circumvent some common issues with PDF files created by scanners / MFPs. Splitter searches for QR-Codes in the rewritten file but assembles the split files directly from the source file. With the option "Assemble split files from rewritten source file?" you can tell splitter to take the pages from the rewritten/reparied version. If you split scanned documents containing bitmap-images this should be safe. If you split documents that contain other assets (text, fonts, vector drawings, etc.) the result can differ from the source!    
+Before Splitter starts analyzing the pages of a PDF file, the source PDF file is rewritten with Ghostscript to work around some common problems with PDF files created by scanners/MFPs. Splitter looks for QR codes in the rewritten file, but assembles the split files directly from the source file. You can use the "Assemble split files from rewritten source file?" option to tell Splitter to take the pages from the rewritten/repaired version. If you are splitting scanned documents that contain bitmap images, this should be safe. If you split documents that contain other elements (text, fonts, vector drawings, etc.), the result may differ from the source!
+
+![OCRthyPDF GUI Language-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/3.png)
+
+The Language tab lets you select the languages present in your documents. The default selection is English and the language of your desktop environment. Since the result of OCR **strongly** depends on this selection, you should select all languages you need and deselect all languages you don't! 
+
+![OCRthyPDF GUI Console-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/4.png)
+
+On the Console tab you can see the output of the processes working "under the hood". This is helpful in case the results are different than expected or the OCR terminates with an error code. You can select the log levels "INFO" (status messages when everything works as expected) and "DEBUG" (a lot of detailed information). By default, the console shows the output of the last subprocess and is cleaned up when a new subprocess is started. You can set the console to show the information of all subprocesses without cleanup.
+
+The two bars at the bottom indicate the status of the split queue and the OCR queue. "Queue" refers to documents waiting to be processed.    
