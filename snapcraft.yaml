@@ -79,7 +79,7 @@ parts:
 
 layout:
   /etc/ImageMagick-6:
-    bind: $SNAP_DATA/etc/ImageMagick-6
+    bind: $SNAP/etc/ImageMagick-6
   /ramtmp:
     type: tmpfs
     user: nobody
