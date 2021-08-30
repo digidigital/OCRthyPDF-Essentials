@@ -77,6 +77,6 @@ The Language tab lets you select the languages present in your documents. The de
 
 ![OCRthyPDF GUI Console-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/4.png)
 
-On the Console tab you can see the output of the processes working "under the hood". This is helpful in case the results are different than expected or the OCR terminates with an error code. You can select the log levels "INFO" (status messages when everything works as expected) and "DEBUG" (a lot of detailed information). By default, the console shows the output of the last subprocess and is cleaned up when a new subprocess is started. You can set the console to show the information of all subprocesses without cleanup.
+In the console you can see the output of the processes working "under the hood". This is helpful in case the results are different than expected or the OCR terminates with an error code. You can select the log levels "INFO" (status messages when everything works as expected) and "DEBUG" (a lot of detailed information). By default, the console shows the output of the last subprocess and is cleaned up when a new subprocess is started. You can set the console to show the information of all subprocesses without cleanup.
 
-The two bars at the bottom indicate the status of the split queue and the OCR queue. "Queue" refers to documents waiting to be processed.    
+The two bars at the bottom indicate the status of the Split Job queue and the OCR job queue. "Queue" refers to documents waiting to be processed.    
