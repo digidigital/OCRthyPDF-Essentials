@@ -70,7 +70,7 @@ Bevor Splitter mit der Analyse der Seiten einer PDF-Datei beginnt, wird die Quel
 
 ![OCRthyPDF GUI Language-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/3.png)
 
-In der Registerkarte Sprache kannst du die Sprachen (über 100 werden unterstützt!) auswählen, die in deinen Dokumenten genutzt werden. Die Standardauswahl ist Englisch und die Sprache deiner Desktop-Umgebung. Da das Ergebnis der OCR **stark** von dieser Auswahl abhängt, solltest du alle Sprachen auswählen, die du benötigst, und alle anderen Sprachen abwählen!
+In der Registerkarte 'Languages' kannst du die Sprachen (über 100 werden unterstützt!) auswählen, die in deinen Dokumenten genutzt werden. Die Standardauswahl ist Englisch und die Sprache deiner Desktop-Umgebung. Da das Ergebnis der OCR **stark** von dieser Auswahl abhängt, solltest du alle Sprachen auswählen, die du benötigst, und alle anderen Sprachen abwählen!
 
 ![OCRthyPDF GUI Console-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/4.png)
 
