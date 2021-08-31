@@ -10,7 +10,7 @@ It supports more than 100 languages "out-of-the-box" (all languages that are ins
 The splitter function extends the text recognition provided by OCRmyPDF. It allows scanned documents to be separated at [separator pages](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) - defined by a QR code - before text recognition. A QR code can mark a [separator-only page](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) that is discarded. Alternatively, in sticker mode, the QR code defines the first page of a new document and is retained.
 
 If you like the results created with OCRthyPDF but need more flexibility I suggest you give [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/) a try on the command line. :)
-OCRthyPDF Essentials 0.6.2
+
 # How To Install
 If you are using Ubuntu or any other Distro that comes with <code>snap</code> pre-installed you can install it directly from the Snap Store 
 
