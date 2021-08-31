@@ -42,7 +42,7 @@ Info about subprocesses like OCRmyPDF, Splitter, Ghostscript, etc. is displayed 
 
 First you need to select a single PDF **or** a folder containing PDF files that should be processed by OCRmyPDF's character recognition. Then you specify a folder where the new PDFs will be saved. If no output folder is selected, the input folder ist set as output folder as well.
 
-The switches in the "Options" tab correspond to the values described in the [OCRmyPDF's cookbook](https://ocrmypdf.readthedocs.io/en/v12.3.3/cookbook.html) and work exactly the same way. Not all combinations are useful or allowed. OCRthyPDF does not prevent you from setting such combinations. In most cases, OCR will simply refuse to start or abort with an error message. See the Console tab for detailed information about what went wrong. 
+The switches in the "Options" tab correspond to the values described in the [OCRmyPDF cookbook](https://ocrmypdf.readthedocs.io/en/v12.3.3/cookbook.html) and work exactly the same way. Not all combinations are useful or allowed. OCRthyPDF does not prevent you from setting such combinations. In most cases, OCR will simply refuse to start or abort with an error message. See the Console tab for detailed information about what went wrong. 
 
 :pushpin: Caution: If you leave the postfix field blank and the output is written to the input folder, you will overwrite your source file! :facepalm:
 
