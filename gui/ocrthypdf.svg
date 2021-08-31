@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg8">
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient1625">
+      <stop
+         id="stop1621"
+         offset="0"
+         style="stop-color:#101010;stop-opacity:1" />
+      <stop
+         id="stop1623"
+         offset="1"
+         style="stop-color:#222222;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5006">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5002" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop5004" />
+    </linearGradient>
+    <filter
+       width="2"
+       height="2"
+       y="-0.5"
+       x="-0.5"
+       style="color-interpolation-filters:sRGB"
+       id="filter4641">
+      <feGaussianBlur
+         stdDeviation="0.01"
+         result="result1"
+         id="feGaussianBlur4629" />
+      <feBlend
+         in2="result1"
+         result="fbSourceGraphic"
+         mode="multiply"
+         id="feBlend4631" />
+      <feTurbulence
+         baseFrequency="0.8"
+         type="fractalNoise"
+         seed="0"
+         numOctaves="3"
+         result="result3"
+         id="feTurbulence4633" />
+      <feDisplacementMap
+         in="fbSourceGraphic"
+         xChannelSelector="R"
+         yChannelSelector="G"
+         scale="50"
+         result="result2"
+         in2="result3"
+         id="feDisplacementMap4635" />
+      <feMorphology
+         radius="1"
+         operator="dilate"
+         result="result4"
+         id="feMorphology4637" />
+      <feBlend
+         mode="screen"
+         in2="result2"
+         id="feBlend4639" />
+    </filter>
+    <linearGradient
+       xlink:href="#linearGradient5006"
+       id="linearGradient5012"
+       x1="16.15513"
+       y1="343.55737"
+       x2="119.33013"
+       y2="141.94487"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-0.26458337,-0.26458333)" />
+    <linearGradient
+       gradientUnits="userSpaceOnUse"
+       y2="408.44693"
+       x2="-95.839165"
+       y1="142.81593"
+       x1="136.72849"
+       id="linearGradient1627"
+       xlink:href="#linearGradient1625" />
+  </defs>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     transform="translate(0,-161.53332)">
+    <circle
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:11.64702606;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path5000-2"
+       cx="68.80323"
+       cy="228.19675"
+       r="57.405659" />
+    <circle
+       style="opacity:1;fill:url(#linearGradient5012);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient1627);stroke-width:12.2318716;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path5000"
+       cx="68.007217"
+       cy="228.46362"
+       r="60.288231" />
+    <g
+       aria-label=" PDF"
+       transform="matrix(0.26458333,0,0,0.26458333,12.01274,200.87089)"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:'Sansita Swashed';-inkscape-font-specification:'Sansita Swashed';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       id="flowRoot815">
+      <path
+         d="m 174.57161,205.11188 q 0,15.16927 -7.68229,23.30729 -7.61719,8.07291 -22.07031,8.07291 h -4.42708 v 34.50521 H 122.68359 V 175.815 h 24.15365 q 27.73437,0 27.73437,29.29688 z m -34.17968,16.01562 h 3.38541 q 6.51042,0 9.70052,-3.58073 3.19011,-3.58073 3.19011,-11.71875 0,-7.48698 -2.92969,-11.06771 -2.92969,-3.64583 -9.04948,-3.64583 h -4.29687 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:192px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5109" />
+      <path
+         d="m 247.09765,222.49469 q 0,23.56771 -9.63542,36.06771 -9.57031,12.43489 -27.60416,12.43489 H 186.55078 V 175.815 h 25.45573 q 16.60156,0 25.84635,12.30469 9.24479,12.23958 9.24479,34.375 z m -18.16406,0.52083 q 0,-31.90104 -17.57813,-31.90104 h -7.09635 v 64.38802 h 5.72917 q 9.70052,0 14.32291,-8.07292 4.6224,-8.13802 4.6224,-24.41406 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5111" />
+      <path
+         d="M 278.54297,270.99729 H 260.96484 V 175.815 h 42.64323 v 15.29948 h -25.0651 v 26.43229 h 23.37239 v 15.29948 h -23.37239 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5113" />
+    </g>
+    <g
+       aria-label=" thy "
+       transform="matrix(0.26458333,0,0,0.26458333,15.509893,165.96168)"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:'Sansita Swashed';-inkscape-font-specification:'Sansita Swashed';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       id="flowRoot815-1">
+      <path
+         d="m 146.83724,257.65094 q 3.64583,0 7.8776,-1.82292 v 13.54167 q -4.23177,2.92968 -12.69531,2.92968 -9.4401,0 -13.9974,-5.59895 -4.55729,-5.66407 -4.55729,-16.92709 v -37.5651 h -7.03125 v -7.74739 l 9.04948,-6.25 4.42709,-15.36459 h 11.0677 v 15.625 h 13.15104 v 13.73698 h -13.15104 v 38.15104 q 0,7.29167 5.85938,7.29167 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:192px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5102" />
+      <path
+         d="m 201.0039,270.99729 v -43.22916 q 0,-15.95052 -8.00781,-15.95052 -5.98958,0 -8.39844,6.3151 -2.40885,6.25 -2.40885,18.03385 v 34.83073 H 164.87109 V 169.69521 h 17.31771 v 22.52604 q 0,4.36198 -0.78125,15.5599 h 0.91146 q 5.20833,-10.67709 16.01562,-10.67709 9.96094,0 15.03906,6.77084 5.07813,6.70573 5.07813,19.79166 v 47.33073 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5104" />
+      <path
+         d="m 225.09245,198.47125 h 17.96874 l 10.02605,40.95052 q 1.49739,5.46875 2.40885,15.29948 h 0.39063 q 0.0651,-1.5625 0.58593,-5.53385 0.52084,-4.03646 0.84636,-6.31511 0.32552,-2.27864 8.98437,-44.40104 h 18.22917 l -20.76823,77.73437 q -3.77604,14.32292 -10.02604,20.57292 -6.25,6.25 -16.66667,6.25 -5.14323,0 -9.17969,-1.10677 v -14.51823 q 2.66928,0.78125 5.98959,0.78125 8.72396,0 11.45833,-11.45833 l 1.23698,-4.55729 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5106" />
+    </g>
+    <g
+       aria-label="OCR"
+       transform="matrix(0.26458333,0,0,0.26458333,8.0652802,150.63329)"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:'Sansita Swashed';-inkscape-font-specification:'Sansita Swashed';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       id="flowRoot815-4">
+      <path
+         d="m 188.17838,173.27594 q 0,23.63281 -8.85416,36.32812 -8.85417,12.69531 -25.32552,12.69531 -16.53646,0 -25.39063,-12.6302 -8.85416,-12.69532 -8.85416,-36.52344 0,-23.63281 8.85416,-36.19791 8.85417,-12.63021 25.52083,-12.63021 16.47136,0 25.26042,12.69531 8.78906,12.63021 8.78906,36.26302 z m -50.32552,0 q 0,16.27604 4.10157,24.80469 4.10156,8.52864 12.04427,8.52864 16.01562,0 16.01562,-33.33333 0,-33.33333 -15.88542,-33.33333 -8.07291,0 -12.17447,8.52864 -4.10157,8.46354 -4.10157,24.80469 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5095" />
+      <path
+         d="m 233.62109,139.94261 q -7.61719,0 -12.04427,8.91927 -4.36198,8.91927 -4.36198,24.80468 0,33.07292 17.2526,33.07292 7.55209,0 15.82032,-4.81771 v 15.75521 q -6.96615,4.62239 -17.83855,4.62239 -16.08072,0 -24.73958,-12.76041 -8.59375,-12.82552 -8.59375,-36.0026 0,-23.17709 8.85417,-36.13282 8.91927,-12.95572 24.73958,-12.95572 5.20833,0 9.96094,1.43229 4.81771,1.43229 10.28646,5.01302 l -5.85938,14.38802 q -2.92969,-2.01823 -6.25,-3.64584 -3.32031,-1.6927 -7.22656,-1.6927 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5097" />
+      <path
+         d="m 281.47265,183.95302 v 37.04427 H 263.76431 V 125.815 h 23.17708 q 14.71355,0 21.67969,6.96615 7.03125,6.96614 7.03125,21.28906 0,18.03385 -12.17448,25.19531 l 18.29427,41.73177 h -18.94531 l -15.03906,-37.04427 z m 0,-15.23437 h 4.55729 q 6.25,0 8.98437,-3.51563 2.73438,-3.58073 2.73438,-10.61198 0,-7.29166 -2.92969,-10.35156 -2.86458,-3.125 -8.91927,-3.125 h -4.42708 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:133.33332825px;font-family:'Open Sans Condensed';-inkscape-font-specification:'Open Sans Condensed, '"
+         id="path5099" />
+    </g>
+  </g>
+</svg>
