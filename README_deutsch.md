@@ -34,6 +34,7 @@ Informationen zu Unterprozessen wie OCRmyPDF, Splitter, Ghostscript usw. werden 
 
 # Kurzanleitung
 ![OCRthyPDF GUI Options-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/1.png)
+
 Zuerst musst du ein einzelnes PDF **oder** einen Ordner mit PDF-Dateien auswählen, die von der Zeichenerkennung verarbeitet werden sollen. Dann gibst du einen Ordner an, in dem die neuen PDFs gespeichert werden sollen. Wenn kein Ausgabeordner ausgewählt wird, wird der Eingabeordner automatisch als Ausgabeordner vorbelegt.
 
 Die Einstellungen in der Registerkarte „Optionen“ entsprechen den im OCRmyPDF cookbook beschriebenen Werten und funktionieren genau so. Nicht alle Kombinationen sind sinnvoll oder erlaubt. OCRthyPDF hindert dich nicht, solche Kombinationen einzustellen. In den meisten Fällen verweigert die Texterkennung einfach den Start oder bricht mit einer Fehlermeldung ab. In der Registerkarte ‚Console‘ findst du in diesen Fällen ausführliche Informationen darüber, was schief gelaufen ist.
