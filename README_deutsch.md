@@ -2,7 +2,7 @@
 
 Originaltext auf: [blog.digidigital.de](https://blog.digidigital.de/?p=525&lang=de_DE)
 
-Da es leider immer wieder vorkommt, dass die Originaldateien eingescannter Texte nicht mehr vorliegen (oder nicht mehr gefunden werden können), muss in diesen Fällen eine Texterkennung bemüht werden, um aus den Bilddateien in den PDFs editierbaren Text zu erzeugen. Das Kommandozeilentool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/ von James Barlow hat mir diesbezüglich schon häufig das Leben im Umgang mit eingescannten Textdateien erleichtert.
+Da es leider immer wieder vorkommt, dass die Originaldateien eingescannter Texte nicht mehr vorliegen (oder nicht mehr gefunden werden können), muss in diesen Fällen eine Texterkennung bemüht werden, um aus den Bilddateien in den PDFs editierbaren Text zu erzeugen. Das Kommandozeilentool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/) von James Barlow hat mir diesbezüglich schon häufig das Leben im Umgang mit eingescannten Textdateien erleichtert.
 
 Da es ich keine einfach gehaltene grafische Benutzeroberfläche finden konnte, kam mir die Idee zu OCRthyPDF – Einer Benutzerobefläche, die Anwendern, die nicht an die Benutzung von Kommandozeilen-Tools gewöhnt sind, den Zugang zu den grundlegenden Funktionen von OCRmyPDF ermöglicht.
 
