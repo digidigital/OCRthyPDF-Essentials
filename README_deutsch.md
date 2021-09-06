@@ -4,7 +4,7 @@ Originaltext auf: [blog.digidigital.de](https://blog.digidigital.de/?p=525&lang=
 
 Da es leider immer wieder vorkommt, dass die Originaldateien eingescannter Texte nicht mehr vorliegen (oder nicht mehr gefunden werden können), muss in diesen Fällen eine Texterkennung bemüht werden, um aus den Bilddateien in den PDFs editierbaren Text zu erzeugen. Das Kommandozeilentool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/) von James Barlow hat mir diesbezüglich schon häufig das Leben im Umgang mit eingescannten Textdateien erleichtert.
 
-Da es ich keine einfach gehaltene grafische Benutzeroberfläche finden konnte, kam mir die Idee zu OCRthyPDF – Einer Benutzerobefläche, die Anwendern, die nicht an die Benutzung von Kommandozeilen-Tools gewöhnt sind, den Zugang zu den grundlegenden Funktionen von OCRmyPDF ermöglicht.
+Da es ich keine einfach gehaltene grafische Benutzeroberfläche finden konnte, kam mir die Idee zu OCRthyPDF – Einer Benutzeroberfläche, die Anwendern, die nicht an die Benutzung von Kommandozeilen-Tools gewöhnt sind, den Zugang zu den grundlegenden Funktionen von OCRmyPDF ermöglicht.
 
 ![OCRthyPDF GUI](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/1.png)
 
@@ -21,7 +21,7 @@ Alternativ gibst du im Terminal
 
 ein.
 
-Wenn deine Distro Gnome Software /snapd nicht vorinstalliert hat, finden du [hier](https://snapcraft.io/docs/installing-snapd) eine Anleitung zur Installation.
+Wenn deine Distro Gnome Software / snap nicht vorinstalliert hat, findest du [hier](https://snapcraft.io/docs/installing-snapd) eine Anleitung zur Installation.
 
 # Fehlersuche
 Snaps werden in einer eingeschränkten Umgebung ausgeführt und benötigen Berechtigungen für den Zugriff auf Dateien auf deinem Rechner (ähnlich wie Apps auf dem Smartphone). Prüfe daher zunächst, ob du die richtigen Berechtigungen in der Benutzeroberfläche des Stores eingestellt hast.
