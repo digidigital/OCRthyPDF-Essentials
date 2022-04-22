@@ -569,7 +569,7 @@ layout = [
                     sg.Tab('Languages', tab3_layout),
                     sg.Tab('Console', tab4_layout),
                     sg.Tab('Licenses', tab5_layout)
-                ]], size = (625,300))
+                ]], size = (None,None))
             ], 
             [
                 sg.Button('Start OCR', key='start_ocr', disabled = True),
