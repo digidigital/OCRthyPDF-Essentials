@@ -26,7 +26,7 @@ import sys, ast, signal, subprocess, shlex
 import queue
 import glob
 from copy import deepcopy
-from configparser import ConfigParser
+from configparser import ConfigParser, NoOptionError
 from random import randint
 from tempfile import TemporaryDirectory
 import logging
@@ -53,7 +53,7 @@ background = sg.LOOK_AND_FEEL_TABLE[theme]['BACKGROUND']
 
 #App values
 aboutPage = 'https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/About.md'
-version = '0.6.3'
+version = '0.6.4'
 applicationTitle = 'OCRthyPDF Essentials'
 
 # Read licenses
@@ -73,7 +73,7 @@ for f in licenses:
 # Config related
 stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
                  'deskew', 'rotate', 'background', 'sidecar', 'runsplitter', 
-                 'separator', 'separatorpage', 'usesourcename', 'loglevel', 'repair']
+                 'separator', 'separatorpage', 'usesourcename', 'loglevel', 'areafactor']
 
 pathOptions = ['filename','infolder','outfolder']
 
@@ -152,8 +152,10 @@ def readConfig():
         if option != '' and option in ('filename', 'infolder'):
             window['start_ocr'].update(disabled=False) 
     for o in stringOptions:
-        window['opt_' + o].update(value = config.get('OCRmyPDFoptions', 'opt_' + o))
-
+        try:
+            window['opt_' + o].update(value = config.get('OCRmyPDFoptions', 'opt_' + o))
+        except NoOptionError:
+            logging.debug('No config option for ' + o)    
           
 def writeConfig():
     log.debug('Creating / Updating config')
@@ -262,10 +264,14 @@ def startSplitJob (filename, Job):
     if tmpOptions['opt_separatorpage'] == 'Sticker Mode':
         args = args + '--sticker-mode '
 
-    # Assemble split parts from repaired PDF
+    # DEPRECATED: Assemble split parts from repaired PDF
+    '''
     if tmpOptions['opt_repair'] == 'yes':
         args = args + '-r '    
-
+    '''
+    
+    args = args + '-af ' + tmpOptions['opt_areafactor'] + ' '
+    
     # Loglevel
     args = args + "--log " + tmpOptions['opt_loglevel'] + " "
     
@@ -295,22 +301,6 @@ def startSplitJob (filename, Job):
         window['console'].print(commandLine)
     
     return Job
-'''
-def startCleanJob (filename, Job):
-    Job['file']=filename
-    Job['progressValue']=0
-    Job['type']='clean'
-    Job['outFile'] = tmpdir.name + "/cleaned-" + str(uuid.uuid1()) + ".pdf"
-    commandLine = "gs -o '" + Job['outFile'] + "' -sDEVICE=pdfwrite -dFILTERTEXT '" + Job['file'] + "'"
-    log.debug('Commandline: ' + commandLine)
-    execute = shlex.split(commandLine)
-    Job['process'] = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #make STDOUT/readline non-blocking!
-    set_blocking(Job['process'].stdout.fileno(), False)
-    Job['running']=True
-    log.info('Clean job (stripping ALL text) started' + Job['file'])
-    return Job
-'''
 
 def startOCRJob (filename, Job):
     Job['file']=filename
@@ -377,7 +367,7 @@ def startOCRJob (filename, Job):
     outFileParts = inputFilename.rsplit('.', 1)
     outFile = path.join(tmpOptions['outfolder'], outFileParts[0] + tmpOptions['opt_postfix'] + '.' + outFileParts[1])
     
-    commandLine = "ocrmypdf " + args + "'" + Job['file'] + "' '" + outFile + "'"
+    commandLine = "ocrmypdf --use-threads " + args + "'" + Job['file'] + "' '" + outFile + "'"
 
     execute = shlex.split(commandLine)
     log.debug('Commandline: ' + commandLine)
@@ -477,7 +467,7 @@ tab2_layout =   [
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output.', enable_events = True)],                  
                     [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
-                    [sg.T('Assemble split files from rewritten source file?:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_repair', tooltip='Default: no - Splitter "rewrites" the PDF prior to extracting images but assembles split files from original. Check for font substitutions!', enable_events = True)]                        
+                    [sg.T('Limit QR-code search area:'),sg.InputCombo(('1.0','0.5','0.25'), default_value='1', key='opt_areafactor', tooltip='Default: 1.0 - Multiply width and height with this factor to\nlimit the search area and speed up splitting.\n1 = Whole image(page)\n0.5 = Upper left quadrant\n0.25 = Upper left quadrant of upper left quadrant', enable_events = True)]                        
                 ]                   
 
 tab3_layout =   [
@@ -636,16 +626,17 @@ while True:
                              
         if Job['process'].poll() is not None: 
             
-            if Job['process'].returncode == 0:
+            if Job['process'].returncode in (0, 10):
                 exitMessage = exitCode[Job['process'].returncode]
-                
+                log.debug('Job Exit-Code: ' + exitMessage)
                 #reset progress bar
                 window['progress_bar'].update(0)
             
                 Job = nextJob(Job)
 
-            elif Job['process'].returncode in (1,2,3,4,5,6,7,8,9,10,15,130):
+            elif Job['process'].returncode in (1,2,3,4,5,6,7,8,9,15,130):
                 exitMessage = exitCode[Job['process'].returncode]  
+                log.debug('Job Exit-Code: ' + exitMessage)
                 #debug
                 while True:
                     line = Job['process'].stdout.readline().decode()

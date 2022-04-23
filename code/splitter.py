@@ -1,144 +1,136 @@
 #!/usr/bin/env python3
-#Version 0.4
-import zxing
+#Version 0.6
+
 import logging
 import argparse
-import re
 import subprocess
 import shlex
 import sys
 import time
 import concurrent.futures
-
+import pdftotext
+from pyzbar.pyzbar import decode, ZBarSymbol
 from tempfile import TemporaryDirectory
-from pikepdf import Pdf, PdfImage, Page, PdfError, _cpphelpers 
+from pikepdf import Pdf, PdfImage, PdfError, _cpphelpers 
 from os import path
 from multiprocessing import cpu_count
+from shutil import copy2
 
-startScriptTime = time.time()
-parser = argparse.ArgumentParser(description="""Split a PDF-file into separate files based on a separator barcode / QR-Code. 
-Without --sticker-mode the separator page will be discarded. In Sticker Mode
-a QR-Code starts a new segment and the page will be added to the output.
-Be sure to add a QR-Code to the first page as well.
-You can use the pattern <SEPARATOR>|<CUSTOM_POSTFIX> in your QR-Code to add
-a custom postfix to the filename by using --sticker-mode (Use individual 
-postfixes in each code since no segment numbers are added). 
+def searchPDF (PDFfile, separator):
+    try:
+        startAnalysisTime = time.time()
+        with open(PDFfile, "rb") as fp:
+            pdfAsText = pdftotext.PDF(fp)        
+            separatorPages={}
+            pageNumber=0
+            for page in pdfAsText:
+                logging.info('Searching for separator on page: %d'% (pageNumber+1)) 
+                if str(page).find(separator) != -1:
+                    separatorPages[pageNumber]=''
+                    logging.info('Found separator on page: %d'% (pageNumber+1))
+                pageNumber += 1
+        logging.info('Analysis completed: %d separators found on %d pages. This step took about %d seconds'%(len(separatorPages),pageNumber, int(time.time() - startAnalysisTime)))
+        return separatorPages
+    except Exception as error:
+        logging.critical('Text-searching file %s failed. %e' % (PDFfile, error))
+        return separatorPages
 
-Examples: 
-    NEXT|CoverLetter NEXT|Attachments 
-    or 
-    NEXT|CoverLetter_Miller NEXT|CoverLetter_Smith
+def analyzePage(PDF, pageNumber, separator='NEXT', mode='QR', cropfactor=1):
 
-If you use Sticker Mode without a custom prefix segment numnbers will be added
-to the filename.""")
-
-def analyzePage(PDF, pageNumber, separator):
-    reader = zxing.BarCodeReader()
+    #Set separatorCode to None. If separatorCode has any other value than None
+    #a separator was found on the page
     separatorCode=None
-    logger.info('Analyzing page: %d'% (pageNumber+1))
-       
-    with TemporaryDirectory() as temp_dir:
-        
-        for image in PDF.pages[0].images.keys():
-            pdfimage = PdfImage(PDF.pages[0].images[image]) 
-            extractedImage = str(temp_dir) + str(image)
-            logger.debug('Extracting image: ' + extractedImage)
-            try:
-                savedImage = pdfimage.extract_to(fileprefix=extractedImage)
-                logger.debug('Saved as: ' + savedImage)
-                #If image not JPG or PNG convert to PNG
-                if not re.findall("\.(jpg\Z|JPG\Z|png\Z|PNG\Z)", savedImage):
-                    newImage = savedImage + '.jpg'
-                    logger.debug('Converting %s to %s'% (savedImage, newImage))
-                    command = shlex.split("convert -verbose -quality 100% '" + savedImage + "' '" + newImage + "'")
-                    logger.debug(command)
-                    try:
-                        subprocess.run(command)  
-                        savedImage = newImage
-                    except:
-                        logger.debug('Conversion failed')
-                        continue
-                    
-            except NotImplementedError:
-                logger.debug('PikePDF was unable to extract image: ' + extractedImage + ' - Not implemented')
-                continue
-            except:
-                logger.debug('Some error occured while extracting ' + extractedImage)
-                continue
+    logging.debug('Analyzing page: %d'% (pageNumber+1))      
+   
+    if mode == 'QR':
+        symbols = [ZBarSymbol.QRCODE]
+    else: 
+        symbols = None        
+    
+    for image in PDF.pages[0].images.keys():
+        uncroppedImage = PdfImage(PDF.pages[0].images[image]).as_pil_image()
+        width, height = uncroppedImage.size
+        cropbox=(0, 0, int(width*cropfactor), int(height*cropfactor))
+        pdfimage = uncroppedImage.crop(cropbox)  
+        uncroppedImage.close()
+
+        logging.debug('Extracting and analyzing an image of type %s on page %d' % (type(pdfimage),pageNumber+1))
+
+        try:             
+            barcodes = decode(pdfimage, symbols)
             
-            try:
-                logger.debug('Trying to find barcode in: %s' % (savedImage)) 
-                barcode = reader.decode(savedImage)
-            except: 
-                logger.debug('Decoding barcode failed. Most likely the image format is not supported.')
-                barcode = False
+        except Exception as error: 
+            logging.debug('Decoding barcode failed. Skipping one image on page %d - %s' % (pageNumber+1, error))
+            continue
+        
+        pdfimage.close()
+
+        for barcode in barcodes:
+                
+            barcodeText=str(barcode.data.decode("utf-8"))
+            logging.debug('QR-Code / Barcode containing text "%s" found on page %d. Use | as delimiter if you want to use a custom postfix' % (str(barcodeText), pageNumber+1))
+            barcodeComponents = barcodeText.split('|',1)
+            
+            if len(barcodeComponents)==2 and barcodeComponents[0] == separator:
+                separatorCode = str(barcodeComponents[1])  
+                #Do not checkfor barcodes in remaining data
+                break
+
+            elif barcodeComponents[0] == separator:
+                separatorCode = ''  
+                #Do not check for barcodes in remaining data
+                break
+
+            else:
+                logging.debug('Ignored. Reason: "%s" on page %d does not start with separator "%s". Use | as delimiter if you want to use a custom postfix' % (str(barcodeText), pageNumber+1, separator))     
                 continue
+        
+        
 
-            if barcode:
-                logger.info('QR-Code / Barcode containing text "%s" found on page %d. Use | as delimiter if you want to use a custom postfix' % (barcode.parsed, pageNumber+1))
-                barcodeComponents = barcode.parsed.split('|',1)
-                if len(barcodeComponents)==2 and barcodeComponents[0] == separator:
-                    separatorCode = str(barcodeComponents[1])  
-                    #Do not search for barcodes in remaining images
-                    break
-
-                elif barcodeComponents[0] == separator:
-                    separatorCode = ''  
-                    #Do not search for barcodes in remaining images
-                    break
-
-                else:
-                    logger.info('Ignored. Reason: "%s" on page %d does not start with separator "%s". Use | as delimiter if you want to use a custom postfix' % (barcode.parsed, pageNumber+1, separator))     
-                    continue
+        #Skip remaining images if valid separator was found on page
+        if separatorCode != None:
+            break
 
     return (pageNumber,separatorCode)
 
-parser.add_argument('filename', metavar='/path/to/inputfile.pdf', type=str,
-                    help='Filename of PDF')
-parser.add_argument('-d', '--drop-filename', action='store_true',
-                    help='Do not use input filename for output filename')
-parser.add_argument('-s', '--separator', type=str, default="NEXT",
-                    help='Barcode text used to find separator pages. Default: NEXT')
-parser.add_argument('--sticker-mode', action='store_true',
-                    help='New PDF-Seqment starts at QR-Code (Page will be kept). Add custom postfix to barcode content by using | as delimiter')
-parser.add_argument('-r', '--rewrite', action='store_true',
-                    help='Split a rewritten version of the source PDF.')
-parser.add_argument('-o', '--output-folder', metavar='/path/to/output/folder', type=str, 
-                    help='Where to save the split files? Default: Same as input folder')
-parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEBUG'],
-                    help='Available log levels: WARNING, INFO, DEBUG')
 
-args = parser.parse_args()
-
-logger = logging.getLogger('splitPDF')
-loglevel=logging.getLevelName(args.log.upper())
-if isinstance(loglevel, int):
-    logging.basicConfig(level=loglevel)
-else:
-    raise ValueError('Invalid log level: %s' % loglevel)
-
-if args.log.upper() == "DEBUG":
-    gsQuiet=''
-else:
-    gsQuiet=' -q '
-
-def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dropName=False, noRepair=False):
-       
-    logger.info('Rewriting PDF.')
-    tempSourceDir=TemporaryDirectory()
-    rewrittenPDF= tempSourceDir.name + "/repaired.pdf"
-    
-    command = shlex.split("gs -o " + rewrittenPDF + gsQuiet + " -sDEVICE=pdfwrite  -dPDFSETTINGS=/prepress '" + filename + "'")
-   
-    logger.debug(command)     
-    try:  
-        subprocess.run(command) 
-    except:
-        logger.debug('Rewriting failed')
-        sys.exit("Unable to start rewrite step. Is Ghostscript installed?")
-     
-    sourcePDF = Pdf.open(rewrittenPDF)
+def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode=False, dropName=False, workers=0, skipRewrite=False, cropfactor=1):
+    startSplitTime = time.time()   
+    if not skipRewrite:
+        logging.debug('Rewriting PDF %s to temporary file.' % filename)
+        tempSourceDir = TemporaryDirectory()
+        rewrittenPDF = path.join(tempSourceDir.name, "tempPDF.pdf")
  
+        gsQuiet=''
+        #gsQuiet=' -q '
+
+        # Rewrite PDF and try to fix issues
+        # Remove images if searching for keywords, remove text if searching for QR/Barcodes
+        if mode == "KEYWORD":
+            gsFilter = ' -dFILTERIMAGE -dFILTERVECTOR '
+        else:
+            gsFilter = ' -dFILTERTEXT -dFILTERVECTOR '
+        
+        command = shlex.split("gs -o " + rewrittenPDF + gsQuiet + " -sDEVICE=pdfwrite " + gsFilter + " -dPDFSETTINGS=/default -dNEWPDF -sstdout=%stderr '" + filename + "'")
+       
+        logging.debug(command)     
+        try:  
+            subprocess.run(command) 
+            logging.debug('Rewriting completed after %d seconds.'%(int(time.time() - startSplitTime)))
+        except Exception as error:
+            logging.debug('Rewriting failed. Is Ghostscript installed and in PATH? %s' % error)
+            sys.exit("Unable to start rewrite step. Is Ghostscript installed?")
+        loadpdf = rewrittenPDF
+    else: 
+        logging.debug('Rewriting is skipped. Working with source PDF.')
+        loadpdf = filename
+    
+    try:
+        pdf = Pdf.open(loadpdf)
+    except Exception as error:
+        logging.critical('Loading PDF %s failed. %s' % (loadpdf, error))
+        sys.exit("Unable to open PDF file.")
+
     if not outpath:
         outpath=path.dirname(filename)
 
@@ -151,132 +143,197 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', stickerMode=False, dro
     # by | or the number of QR-Codes found
     separatorPages={}
     
-    # let's see how quick we can analyze th epages in multiprocessing/threading
-    startTime = time.time()
+    if workers > 0:
+        max_workers = workers
+    else:
+        max_workers = cpu_count() - 1
 
-    # All files created while splitting
-    fileList=[]
-    logger.info('Extracting images and searching for QR-Codes / Barcodes')
+    if mode != 'KEYWORD':
+        # let's see how quick we can analyze the pages in multiprocessing/threading
+        startAnalysisTime = time.time()
+        logging.debug('Extracting images and searching for QR-Codes / Barcodes')
 
-    separatePages=[]
-    with Pdf.open(rewrittenPDF) as pdf:
         pageCollection=[]
-
-        #creating single page PDFs since passing a page directly raises a pickle exception :(
+        #creating single page PDFs since passing a page directly raises a pickle exception / images can not be accessed :(
         for page in pdf.pages:
             tempPDF = Pdf.new()
             tempPDF.pages.append(page)
             pageCollection.append(tempPDF)
-        
-        max_workers=round((cpu_count()*2/3),0)
+        pdf.close()
 
-        logger.info('Analyzing pages with %d workers' % (max_workers))
+        logging.debug('Analyzing pages with %d workers' % (max_workers))
         with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
-            future_page_analyzer = {executor.submit(analyzePage, pageCollection[pageNumber], pageNumber, separator): pageNumber for pageNumber in range(len(pdf.pages))}
+            future_page_analyzer = {executor.submit(analyzePage, pageCollection[pageNumber], pageNumber, separator, mode, cropfactor): pageNumber for pageNumber in range(len(pdf.pages))}
             for future in concurrent.futures.as_completed(future_page_analyzer):
                 thread = future_page_analyzer[future]
                 try:
                     if future.result()[1] != None:
                         separatorPages[future.result()[0]]=future.result()[1]
-                        #result=future.result()
 
                 except Exception as exc:
-                    logger.info('Thread %r generated an exception: %s' % (thread, exc))
+                    logging.debug('Thread %r generated an exception: %s' % (thread, exc))
         
-        for page in pageCollection:
-            page.close()
-
-    logger.info('Analysis completed: %d separators found on %d pages. This took about %d seconds'%(len(separatorPages),len(pageCollection), int(time.time() - startTime)))
-
-    if args.rewrite:
-        logger.info('Pages will be copied from rewritten PDF. Check for font substitutions!')
-        sourcePDF = Pdf.open(rewrittenPDF)
-    else:
-        logger.info('Pages will be copied from original PDF.')   
-        sourcePDF = Pdf.open(filename)
+        logging.debug('Analysis completed: %d separators found on %d pages. This step took about %d seconds'%(len(separatorPages),len(pdf.pages), int(time.time() - startAnalysisTime)))
         
-    #Separator pages start new segment and will be kept 
-    if stickerMode == True and len(separatorPages)>0:
-        logger.info('Assembling PDFs in "Sticker Mode"')
-        pageList=sorted(separatorPages.keys())
-        for x in range (0,len(pageList)):
-            
-            startPage=pageList[x]
+        pageCollection.clear()
 
-            if x == len(pageList)-1:
-                #Last segment ends with last page of PDF
-                endPage=len(sourcePDF.pages) 
-            else:
-                #Stop segment one Page before another QR-Code was found
-                endPage=pageList[x+1]
+    else:   
+        separatorPages = searchPDF (filename, separator)
+
+    # All filenames created while splitting go here
+    fileList=[]
+
+    if len(separatorPages)>0:
+        logging.debug('Pages will be copied from original PDF.')   
+        
+        try:
+            sourcePDF = Pdf.open(filename)
+        except:
+            logging.critical('Loading of PDF %s failed.' % filename)
+            sys.exit("Unable to open PDF file.")
+    
+        #Separator pages start new segment and will be kept 
+        if stickerMode == True:
+            logging.debug('Assembling PDFs in "Sticker Mode"')
+            pageList=sorted(separatorPages.keys())
+            for x in range (0,len(pageList)):
                 
-            splitPDF = Pdf.new()
+                startPage=pageList[x]
 
-            #is either part of QR-Code or index number
-            filenamePostfix=str(separatorPages[pageList[x]])
-            if filenamePostfix=='':
-                filenamePostfix = "%04d"% (x+1) 
+                if x == len(pageList)-1:
+                    #Last segment ends with last page of PDF
+                    endPage=len(sourcePDF.pages) 
+                else:
+                    #Stop segment one Page before another QR-Code was found
+                    endPage=pageList[x+1]
+                    
+                splitPDF = Pdf.new()
 
-            pageRange = range (startPage, endPage)
-            for includePage in pageRange:
-                logger.debug('Adding source page %d to new PDF' % (includePage+1))
-                splitPDF.pages.append(sourcePDF.pages[includePage])  
-            saveAs = outpath + '/' + sourceName  +  filenamePostfix + '.pdf'
-            logger.info('Saving PDF: %s' % (saveAs))
-            fileList.append(saveAs)
-            try:
-                splitPDF.save(saveAs)
-            except:
-                logger.debug('Saving PDF failed.')
-            splitPDF.close() 
+                #is either part of QR-Code or index number
+                filenamePostfix=str(separatorPages[pageList[x]])
+                if filenamePostfix=='':
+                    filenamePostfix = "%04d"% (x+1) 
 
-    #Separator pages are dropped    
-    elif len(separatorPages)>0:
-        logger.info('Assembling PDFs in "Separator Page Mode"')
-        startPage=0
-        pageList=sorted(separatorPages.keys())
-
-        #Multithreading candidate??
-        for x in range (0,len(pageList)+1): 
-
-            if x == len(pageList):
-                #Last segment ends with last page of PDF
-                endPage=len(sourcePDF.pages) 
-            else:
-                #Stop at page before separator was found
-                endPage=pageList[x]
-            splitPDF = Pdf.new()
-
-            filenamePostfix= "%04d"% (x+1)
-            
-            hasPages = False
-
-            pageRange = range (startPage, endPage)
-            for includePage in pageRange:
-                logger.debug('Adding source page %d to new PDF' % (includePage+1))
-                splitPDF.pages.append(sourcePDF.pages[includePage])  
-                hasPages = True
-            if hasPages:
-                saveAs = outpath + '/' + str(sourceName) + str(filenamePostfix) + '.pdf'
-                logger.info('Saving PDF: %s' % (saveAs))
+                pageRange = range (startPage, endPage)
+                for includePage in pageRange:
+                    logging.debug('Adding source page %d to new PDF' % (includePage+1))
+                    splitPDF.pages.append(sourcePDF.pages[includePage])  
+                saveAs = path.join(outpath , str(sourceName) + str(filenamePostfix) + '.pdf')
+                logging.debug('Saving PDF: %s' % (saveAs))
                 fileList.append(saveAs)
                 try:
                     splitPDF.save(saveAs)
+                    splitPDF.close()
                 except:
-                    logger.debug('Saving PDF failed.')
-            else:
-                logger.debug('Segment %s has no pages. QR-Codes on first page, last page or on consecutive pages?'% (str(filenamePostfix)))
-            splitPDF.close() 
-            
-            startPage=endPage+1
-    logger.info('Finished splitting %s in: %d seconds.'%(args.filename, int(time.time() - startScriptTime)))
-    sourcePDF.close()
-    
-    if len(fileList) > 0:
-        return fileList 
-    else:
-        return None
+                    logging.critical('Saving split PDF %s failed.' % saveAs)
+                    #sys.exit("Unable to write split file to output folder.")
+                
+        #Separator pages are dropped    
+        else:
+            logging.debug('Assembling PDFs in "Separator Page Mode"')
+            startPage=0
+            pageList=sorted(separatorPages.keys())
 
+            #Multithreading candidate??
+            for x in range (0,len(pageList)+1): 
+
+                if x == len(pageList):
+                    #Last segment ends with last page of PDF
+                    endPage=len(sourcePDF.pages) 
+                else:
+                    #Stop at page before separator was found
+                    endPage=pageList[x]
+                splitPDF = Pdf.new()
+
+                filenamePostfix= "%04d" % (x+1)
+                
+                hasPages = False
+
+                pageRange = range (startPage, endPage)
+                for includePage in pageRange:
+                    logging.debug('Adding source page %d to new PDF' % (includePage+1))
+                    splitPDF.pages.append(sourcePDF.pages[includePage])  
+                    hasPages = True
+                if hasPages:
+                    saveAs = path.join(outpath , str(sourceName) + str(filenamePostfix) + '.pdf')
+                    logging.info('Saving PDF: %s' % (saveAs))
+                    fileList.append(saveAs)
+                    try:
+                        splitPDF.save(saveAs)
+                        splitPDF.close() 
+                    except:
+                        logging.critical('Saving PDF %s failed.' % saveAs)
+                        #sys.exit("Unable to write split file to output folder.")
+                else:
+                    logging.debug('Segment %s has no pages. Separator on first page, last page or on consecutive pages?'% (str(filenamePostfix)))
+                
+                
+                startPage=endPage+1
+        logging.info('Finished splitting %s in: %d seconds.'%(filename, int(time.time() - startSplitTime)))
+        
+        sourcePDF.close()
+        
+    if len(fileList) == 0:
+        saveAs = path.join(outpath , path.basename(filename))
+        try: 
+            logging.debug('Start to copy') 
+            copy2(filename, saveAs)
+            fileList.append(saveAs)
+            logging.info('%s copied to %s' % (filename, saveAs)) 
+        except:
+            logging.critical('Writing source file to output folder failed')    
+
+    logging.debug('Total time: %d seconds.'%(int(time.time() - startSplitTime)))
+    return fileList
+         
+   
 if __name__ == "__main__":
+   
+    parser = argparse.ArgumentParser(description="""Split a PDF-file into separate files based on a separator QR-Code / barcode / keyword. 
+Without --sticker-mode the separator page will be discarded. In Sticker Mode
+a separator starts a new segment and the page will be added to the output.
+Be sure to add a separator to the first page as well when using Sticker Mode.
+You can use the pattern <SEPARATOR>|<CUSTOM_POSTFIX> in your QR-Code / Barcode
+to add a custom postfix to the filename by using --sticker-mode (Use individual 
+postfixes in each code since no segment numbers are added). 
 
-    print(str(splitPDF (args.filename, args.output_folder, args.separator, args.sticker_mode, args.drop_filename, args.rewrite)))
+Examples: 
+    NEXT|CoverLetter NEXT|Attachments 
+    or 
+    NEXT|CoverLetter_Miller NEXT|CoverLetter_Smith
+
+If you use Sticker Mode without a custom prefix segment numbers will be added
+to the filename.""")
+
+    parser.add_argument('filename', metavar='/path/to/inputfile.pdf', type=str,
+                    help='Filename of PDF')
+    parser.add_argument('-d', '--drop-filename', action='store_true',
+                    help='Do not use input filename for output filename')
+    parser.add_argument('-s', '--separator', type=str, default="NEXT",
+                        help='Separator word used to find separator pages. Default: NEXT')
+    parser.add_argument('--sticker-mode', action='store_true',
+                        help='New PDF-Seqment starts at QR-Code (Page will be kept). Add custom postfix to barcode content by using | as delimiter')
+    parser.add_argument('-w', '--workers', type=int, default=0,
+                        help='Number of process workers. Default is CPU cores - 1.')
+    parser.add_argument('-sr', '--skip-rewrite', action='store_true',
+                        help='Skip rewrite / preparation step and work with unaltered source PDF.')
+    parser.add_argument('-m,', '--mode',  default="QR", choices=['QR', 'BARCODE', 'KEYWORD'],
+                        help='Select used separator: QR (default), BARCODE, KEYWORD')
+    parser.add_argument('-af', '--area-factor', type=float, choices=[(1 * x / 4 ) for x in range(1, 5)], default=1.0,
+                        help='Speed up QR/Barcode search by limiting search area. Origin is top left corner. Default is 1.0 (whole page). E.g. 0.5 is upper left quadrant.')
+    parser.add_argument('-o', '--output-folder', metavar='/path/to/output/folder', type=str, 
+                        help='Where to save the split files? Default: Same as input folder')
+    parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEBUG'],
+                        help='Available log levels: WARNING, INFO, DEBUG')
+
+    args = parser.parse_args()
+
+    #logger = logging.getLogger('splitPDF')
+    loglevel=logging.getLevelName(args.log.upper())
+    if isinstance(loglevel, int):
+        logging.basicConfig(level=loglevel)
+    else:
+        raise ValueError('Invalid log level: %s' % loglevel)
+        
+    for file in splitPDF (args.filename, args.output_folder, args.separator, args.mode, args.sticker_mode, args.drop_filename, args.workers, args.skip_rewrite, args.area_factor):
+        print(file)
