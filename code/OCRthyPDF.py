@@ -81,6 +81,11 @@ configPath = environ['HOME']+'/.config/OCRthyPDF'
 configini = configPath + '/config_0_6_2.ini'
 config = ConfigParser()
 
+try:
+    user_home = environ['SNAP_REAL_HOME']
+except KeyError:
+    user_home = environ['HOME']
+
 # Other
 runningOCR = False
 runningSPLIT = False
@@ -532,17 +537,17 @@ col2 =  [
             [
                 sg.InputText(key='filename_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='filename', visible=False,  readonly=True, enable_events=True), 
-                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")),)
+                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")), initial_folder=user_home)
             ],
             [
                 sg.InputText(key='infolder_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='infolder', visible=False,  readonly=True, enable_events=True), 
-                sg.FolderBrowse(('Browse'), key='infolder_browse')
+                sg.FolderBrowse(('Browse'), key='infolder_browse', initial_folder=user_home)
             ],
             [
                 sg.InputText(key='outfolder_short', readonly=True, size=(52,1)), 
                 sg.InputText(key='outfolder', visible=False,  readonly=True, enable_events=True), 
-                sg.FolderBrowse(('Browse'), key='outfolder_browse')
+                sg.FolderBrowse(('Browse'), key='outfolder_browse', initial_folder=user_home)
             ]
         ]
 
