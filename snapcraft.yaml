@@ -1,2 +1,150 @@
+name: ocrthypdf
+title: OCRthyPDF Essentials
+base: core20 # the base snap is the execution environment for this snap
+adopt-info: ocrthypdf
+summary: Make your PDF files text-searchable (A GUI for OCRmyPDF)
+description: |
+  This is a basic user interface for the command line tool OCRmyPDF. 
+  It's main purpose is to provide users that are not used to command 
+  line tools easy access to OCRmyPDF's basic features.  
+  You can use it to make PDF files that contain images with text 
+  (e. g. after scanning) searchable by adding an invisible text layer.
+  If you like the results created with OCRthyPDF but need more flexibility 
+  I suggest you give OCRmyPDF a try on the command line. 
+license: AGPL-3.0
+icon: gui/ocrthypdf.svg 
+compression: lzo 
+grade: stable # 'stable' 'devel'
+confinement: strict # 'strict' 'devmode'
+architectures: [amd64]
+environment:
+    PYTHONPATH: $SNAP/usr/bin/python3.9
+    TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
+    GS_LIB: $SNAP/usr/share/ghostscript/Init 
+    GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
+    GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
+    SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
 
+apps:
+  ocrthypdf:
+    command: usr/bin/snapcraft-preload $SNAP/bin/python3.9 $SNAP/code/OCRthyPDF.py
+    command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
+    desktop: $SNAPCRAFT_PROJECT_DIR/gui/ocrthypdf.desktop
+    extensions: [gnome-3-38]
+    plugs:
+      - home
+      - removable-media
+      - unity7
+     
+parts:
+  get-source:
+    plugin: dump
+    source: https://github.com/digidigital/OCRthyPDF-Essentials.git
+  
+  tcltk-launch:
+    plugin: nil
+    stage-snaps: [tcltk-launch]
+  
+  debian-multiarch-triplet-provider-launch:
+    plugin: nil
+    stage-snaps: [debian-multiarch-triplet-provider-launch]
+
+  snapcraft-preload:
+      source: https://github.com/sergiusens/snapcraft-preload.git
+      plugin: cmake
+      cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr -DLIBPATH=/lib
+      build-packages:
+        - gcc-multilib
+        - g++-multilib
+      stage-packages:
+        - lib32stdc++6  
+      override-build: |
+        snapcraftctl build
+        ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
+
+  pull-parts:
+    plugin: nil
+    stage-packages: 
+      - ghostscript
+      - icc-profiles-free 
+      - tesseract-ocr-all
+    build-packages: 
+      - ghostscript
+    override-prime: |
+      snapcraftctl prime
+
+      gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
+      ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
+
+      gsfontpath=$(gs -h | grep  Resource/Font | tr -d ' ':)
+      ln -s -f ${gsfontpath/\/usr\/share\/ghostscript/.} .${gsfontpath}/../../../Font
+
+      tessdatapath=$(find ./ -iname tessdata)                                  
+      ln -s -f ${tessdatapath/usr\/share\/tesseract-ocr\//} ${tessdatapath}/../../tessdata
+ 
+  ocrthypdf:
+    plugin: python
+    source: https://github.com/digidigital/OCRthyPDF-Essentials.git
+    source-type: git
+
+    stage-packages: 
+      - python3.9-venv
+      - python3-tk
+      - fonts-ubuntu
+      - tcl
+      - libxml2 
+      - pngquant 
+      - unpaper 
+      - qpdf 
+      - zlib1g 
+      - libzbar0
+      - libnspr4
+      - libnss3
+      - libpoppler-cpp0v5
+      - libpoppler97
+    
+    override-pull: |
+      snapcraftctl pull  
+      snapcraftctl set-version "$(git describe --tags)"
+    
+    build-packages:
+      - build-essential
+      - python3.9-venv
+      - python3.9-dev
+      - libpoppler-cpp-dev  
+      - pipenv
+
+    build-environment:
+      - SNAPCRAFT_PYTHON_INTERPRETER: python3.9   
+      # python3.9 lives in $SNAPCRAFT_PART_INSTALL/bin
+      - PATH: $SNAPCRAFT_PART_INSTALL/bin:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/:$PATH 
+      #- CPATH: /usr/include/x86_64-linux-gnu/c++/9:/usr/include/x86_64-linux-gnu/c++/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/    
+      - CPATH:  /usr/include/x86_64-linux-gnu/c++/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/
+      - PYTHONPATH: ''
+
+
+    override-build: |
+      # Work around a bug in snapcraft python plugin
+      # https://forum.snapcraft.io/t/build-a-snap-with-any-version-of-python-i-want/10420/8
+          
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/python3.9/distutils
+      cp -r /usr/lib/python3.9/distutils $SNAPCRAFT_PART_INSTALL/usr/lib/python3.9/distutils
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include/
+      cp -r /usr/include/python3.9 $SNAPCRAFT_PART_INSTALL/usr/include/python3.9    
+      
+      snapcraftctl build
+      
+      pip install -U pip wheel setuptools
+      pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect
+      pip uninstall -y wheel 
+
+      # Apply shebang rewrite as done by snapcraft
+      
+      find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
+        sed -i                                                                                \
+          "s|^#!/root/parts/ocrthypdf/install/bin/python3.9$|#!/usr/bin/env python3|" {} \;
+      
+      # debug
+      # find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;  
 
