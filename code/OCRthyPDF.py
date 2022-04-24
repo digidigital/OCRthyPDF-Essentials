@@ -31,6 +31,7 @@ from random import randint
 from tempfile import TemporaryDirectory
 import logging
 import argparse
+import darkdetect
 import uuid
 
 parser = argparse.ArgumentParser(description="OCR and QR / Barcode based splitter for PDF files")
@@ -47,7 +48,13 @@ if isinstance(loglevel, int):
 else:
     raise ValueError('Invalid log level: %s' % loglevel)
 
-theme='DefaultNoMoreNagging'
+if darkdetect.isDark():
+    log.info('Dark mode detected. Using dark theme.')
+    theme = 'DarkBlue14'
+else:    
+    log.info('Light mode detected. Using light theme.')
+    theme='DefaultNoMoreNagging'
+
 sg.theme(theme)   
 background = sg.LOOK_AND_FEEL_TABLE[theme]['BACKGROUND']
 
@@ -71,8 +78,9 @@ for f in licenses:
         license += licenseFile.read()
 
 # Config related
+# 'background', temporarilyy diabled since ocrmypdf v13.0.0
 stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
-                 'deskew', 'rotate', 'background', 'sidecar', 'runsplitter', 
+                 'deskew', 'rotate', 'sidecar', 'runsplitter', 
                  'separator', 'separatorpage', 'usesourcename', 'loglevel', 'areafactor']
 
 pathOptions = ['filename','infolder','outfolder']
@@ -183,7 +191,7 @@ def popUp(message):
         ], 
         element_justification = 'c',
         no_titlebar = True,
-        font=('Open Sans Semibold', 10, 'normal'),
+        font=('Ubuntu', 11, 'normal'),
         auto_close= True,
         auto_close_duration = 10,
         modal=True,
@@ -341,10 +349,11 @@ def startOCRJob (filename, Job):
     if tmpOptions['opt_sidecar'] == 'yes':
         args = args + "--sidecar "
 
-    # background
+    # background (Temporarily disabled since ocrmypdf v13.0.0)
+    '''
     if tmpOptions['opt_background'] == 'yes':
         args = args + "--remove-background "    
-    
+    '''
     # deskew
     if tmpOptions['opt_deskew'] == 'yes':
         args = args + "--deskew "
@@ -457,7 +466,8 @@ tab1_layout =   [
                     [sg.T('Fix page rotation:', tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_rotate', enable_events = True, tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.')],
                     [sg.T('Minimum page rotation confidence:'),sg.Spin(('5','10', '15', '20', '25'),initial_value = '15', key='opt_confidence', size=(2,1),enable_events=True)],
                     [sg.T('Noise:'), sg.InputCombo(('Do nothing', 'Clean for OCR but keep original page', 'Clean for OCR and keep cleaned page'), default_value='Do nothing', key='opt_noise', enable_events = True, tooltip = 'Clean up pages before OCR. If you keep the cleaned pages review the OCRed PDF!')],
-                    [sg.T('Remove background:'), sg.InputCombo(('yes', 'no'), default_value='no', key='opt_background', enable_events = True)],
+                    # Tempoarily disabled since ocrmydf v13.0.0
+                    #  [sg.T('Remove background:'), sg.InputCombo(('yes', 'no'), default_value='no', key='opt_background', enable_events = True), visible=False],
                     [sg.T('Optimization level:'), sg.InputCombo(('0', '1', '2', '3'), default_value='1', key='opt_optimization', enable_events = True, tooltip = '0 = Disables optimization, 1 = Lossless optimizations, 2 + 3 = Reduced image quality ')],
                     [sg.T('Output type:'), sg.InputCombo(('Standard PDF', 'PDF/A-1b', 'PDF/A-2b', 'PDF/A-3b'), default_value='PDF/A-2b', key='opt_standard', enable_events = True)],
                     [sg.T('Postfix (may overwrite original if empty!):'), sg.In('_OCR', key='opt_postfix', change_submits = True, size = (15,1), enable_events = True)],
@@ -535,17 +545,17 @@ col1 =  [
         ]   
 col2 =  [
             [
-                sg.InputText(key='filename_short', readonly=True, size=(52,1)), 
-                sg.InputText(key='filename', visible=False,  readonly=True, enable_events=True), 
+                sg.InputText(key='filename_short', text_color ='black', readonly=True, size=(52,1)), 
+                sg.InputText(key='filename', visible=False, readonly=True, enable_events=True), 
                 sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")), initial_folder=user_home)
             ],
             [
-                sg.InputText(key='infolder_short', readonly=True, size=(52,1)), 
+                sg.InputText(key='infolder_short', text_color ='black', readonly=True, size=(52,1)), 
                 sg.InputText(key='infolder', visible=False,  readonly=True, enable_events=True), 
                 sg.FolderBrowse(('Browse'), key='infolder_browse', initial_folder=user_home)
             ],
             [
-                sg.InputText(key='outfolder_short', readonly=True, size=(52,1)), 
+                sg.InputText(key='outfolder_short', text_color ='black', readonly=True, size=(52,1)), 
                 sg.InputText(key='outfolder', visible=False,  readonly=True, enable_events=True), 
                 sg.FolderBrowse(('Browse'), key='outfolder_browse', initial_folder=user_home)
             ]
@@ -574,7 +584,7 @@ layout = [
          ]
 
 # Create the Window
-window = sg.Window(applicationTitle  + ' ' + version, layout, font=('Open Sans Semibold', 10, 'normal'), finalize = True)
+window = sg.Window(applicationTitle  + ' ' + version, layout, font=('Ubuntu', 11), finalize = True)
 
 # Check if config file exists and create one if none exists 
 
