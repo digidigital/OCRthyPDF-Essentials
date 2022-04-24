@@ -143,8 +143,9 @@ parts:
       
       find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
         sed -i                                                                                \
-          "s|^#!/root/parts/ocrthypdf/install/bin/python3.9$|#!/usr/bin/env python3|" {} \;
+          "s|^#!/build/ocrthypdf/parts/ocrthypdf/install/bin/python3.9$|#!/usr/bin/env python3|" {} \;
       
       # debug
+      echo $SNAPCRAFT_PART_INSTALL
       find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;  
 
