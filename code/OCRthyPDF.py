@@ -50,13 +50,40 @@ else:
 
 if darkdetect.isDark():
     log.info('Dark mode detected. Using dark theme.')
-    theme = 'DarkBlue14'
+    themedef = {
+    'BACKGROUND': '#272727', 
+    'TEXT': '#CCCCCC', 
+    'INPUT': '#222222', 
+    'TEXT_INPUT': '#CCCCCC', 
+    'SCROLL': '#4A4A4A',
+    'BUTTON': ('#CCCCCC', '#373737'), 
+    'PROGRESS': ('#E95420', '#4A4A4A'), 
+    'BORDER': 1, 
+    'SLIDER_DEPTH': 0, 
+    'PROGRESS_DEPTH': 0,
+    'COLOR_LIST': ['#CCCCCC', '#2A2A2A', '#E95420', '#272727'], 
+    'DESCRIPTION': ['Grey', 'White', 'Orange'] }
+    
+    # Colors not taken from theme:
+    readonly_background_color = '#222222'
+    readonly_text_color       = '#CCCCCC'
+    highlight_bg_color        = '#E95420'
+    highlight_t_color         = 'white'
+
+    sg.theme_add_new ('MimicJammyJellyfishDark', themedef)
+
+    theme='MimicJammyJellyfishDark'
 else:    
     log.info('Light mode detected. Using light theme.')
     theme='DefaultNoMoreNagging'
 
+    # Colors not taken from theme:
+    readonly_background_color = None
+    readonly_text_color       = None
+    highlight_bg_color        = 'green'
+    highlight_t_color         = 'white'
+
 sg.theme(theme)   
-background = sg.LOOK_AND_FEEL_TABLE[theme]['BACKGROUND']
 
 #App values
 aboutPage = 'https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/About.md'
@@ -490,7 +517,7 @@ tab3_layout =   [
                         sg.T('Select document language(s):')
                     ],
                     [ 
-                        sg.Listbox(values=languages, key='opt_languages', select_mode='multiple', highlight_background_color = 'green', highlight_text_color = 'white', enable_events = True, size=(15, 12))
+                        sg.Listbox(values=languages, key='opt_languages', select_mode='multiple', highlight_background_color = highlight_bg_color, highlight_text_color = highlight_t_color, enable_events = True, expand_x=True, expand_y =True)# xsize=(15, 12))
                     ]
                 ]   
 
@@ -545,17 +572,17 @@ col1 =  [
         ]   
 col2 =  [
             [
-                sg.InputText(key='filename_short', text_color ='black', readonly=True, size=(52,1)), 
+                sg.InputText(key='filename_short', disabled_readonly_background_color = readonly_background_color, disabled_readonly_text_color = readonly_text_color,  readonly=True, size=(52,1)), 
                 sg.InputText(key='filename', visible=False, readonly=True, enable_events=True), 
                 sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")), initial_folder=user_home)
             ],
             [
-                sg.InputText(key='infolder_short', text_color ='black', readonly=True, size=(52,1)), 
+                sg.InputText(key='infolder_short', disabled_readonly_background_color = readonly_background_color, disabled_readonly_text_color = readonly_text_color, readonly=True, size=(52,1)), 
                 sg.InputText(key='infolder', visible=False,  readonly=True, enable_events=True), 
                 sg.FolderBrowse(('Browse'), key='infolder_browse', initial_folder=user_home)
             ],
             [
-                sg.InputText(key='outfolder_short', text_color ='black', readonly=True, size=(52,1)), 
+                sg.InputText(key='outfolder_short', disabled_readonly_background_color = readonly_background_color, disabled_readonly_text_color = readonly_text_color, readonly=True, size=(52,1)), 
                 sg.InputText(key='outfolder', visible=False,  readonly=True, enable_events=True), 
                 sg.FolderBrowse(('Browse'), key='outfolder_browse', initial_folder=user_home)
             ]
