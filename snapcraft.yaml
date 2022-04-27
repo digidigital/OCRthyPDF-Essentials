@@ -17,6 +17,10 @@ compression: lzo
 grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
+package-repositories:
+ - type: apt
+   ppa: alex-p/tesseract-ocr5
+
 environment:
     PYTHONPATH: $SNAP/usr/bin/python3.9
     TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
@@ -24,10 +28,6 @@ environment:
     GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
     GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
     SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
-
-package-repositories:
- - type: apt
-   ppa: snappy-dev/snapcraft-daily
 
 apps:
   ocrthypdf:
@@ -75,6 +75,7 @@ parts:
       - tesseract-ocr-all
     build-packages: 
       - ghostscript
+      - curl
     override-prime: |
       snapcraftctl prime
 
@@ -86,7 +87,12 @@ parts:
 
       tessdatapath=$(find ./ -iname tessdata)                                  
       ln -s -f ${tessdatapath/usr\/share\/tesseract-ocr\//} ${tessdatapath}/../../tessdata
- 
+      
+      curl --output "${tessdatapath}/best-#1.traineddata" "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/main/{deu,eng,fra,spa,por,ita,rus,ukr,jpn,jpn_vert,ara,hin,pol}.traineddata" 
+
+      # debug
+      # ls -l ${tessdatapath}
+
   ocrthypdf:
     plugin: python
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
@@ -95,7 +101,7 @@ parts:
     stage-packages: 
       - python3.9-venv
       - python3-tk
-      - fonts-ubuntu
+      - fonts-freefont-ttf
       - tcl
       - libxml2 
       - pngquant 
@@ -122,14 +128,13 @@ parts:
     build-environment:
       - SNAPCRAFT_PYTHON_INTERPRETER: python3.9   
       # python3.9 lives in $SNAPCRAFT_PART_INSTALL/bin
-      - PATH: $SNAPCRAFT_PART_INSTALL/bin:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/:$PATH 
-      #- CPATH: /usr/include/x86_64-linux-gnu/c++/9:/usr/include/x86_64-linux-gnu/c++/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/    
+      - PATH: $SNAPCRAFT_PART_INSTALL/bin:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/:$PATH   
       - CPATH:  /usr/include/x86_64-linux-gnu/c++/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/
       - PYTHONPATH: ''
 
 
     override-build: |
-      # Work around a bug in snapcraft python plugin
+      # Work around a bug in snapcraft python plugin / gnome 3.38 extension
       # https://forum.snapcraft.io/t/build-a-snap-with-any-version-of-python-i-want/10420/8
           
       rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/python3.9/distutils
@@ -147,9 +152,7 @@ parts:
       
       find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
         sed -i                                                                                \
-          "s|^#!${SNAPCRAFT_PART_INSTALL}/bin/python3.9$|#!/usr/bin/env python3|" {} \;
+          "s|^#!/root/parts/ocrthypdf/install/bin/python3.9$|#!/usr/bin/env python3|" {} \;
       
       # debug
-      echo $SNAPCRAFT_PART_INSTALL
-      find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;  
-
+      # find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;
