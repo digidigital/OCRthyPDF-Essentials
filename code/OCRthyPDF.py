@@ -87,7 +87,7 @@ sg.theme(theme)
 
 #App values
 aboutPage = 'https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/About.md'
-version = '0.6.4'
+version = '0.7.0'
 applicationTitle = 'OCRthyPDF Essentials'
 
 # Read licenses
@@ -107,7 +107,7 @@ for f in licenses:
 # Config related
 # 'background', temporarilyy diabled since ocrmypdf v13.0.0
 stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
-                 'deskew', 'rotate', 'sidecar', 'runsplitter', 
+                 'deskew', 'rotate', 'sidecar', 'runsplitter', 'tess-thresholding',
                  'separator', 'separatorpage', 'usesourcename', 'loglevel', 'areafactor']
 
 pathOptions = ['filename','infolder','outfolder']
@@ -205,9 +205,8 @@ def writeConfig():
         config.set('OCRmyPDFoptions', 'opt_' + option, str(values['opt_' + option]))
     for option in pathOptions:
         config.set('OCRthyPDFpaths', option, str(values[option]))    
-    fp=open(configini,'w+')
-    config.write(fp)
-    fp.close()
+    with open(configini, 'w+') as configfile:
+        config.write(configfile)
 
 # Just a simple popup message in a function so I can change formatting and behaviour in one place. :)
 def popUp(message):
@@ -218,7 +217,7 @@ def popUp(message):
         ], 
         element_justification = 'c',
         no_titlebar = True,
-        font=('Ubuntu', 11, 'normal'),
+        font=('FreeSans', 11, 'normal'),
         auto_close= True,
         auto_close_duration = 10,
         modal=True,
@@ -381,6 +380,16 @@ def startOCRJob (filename, Job):
     if tmpOptions['opt_background'] == 'yes':
         args = args + "--remove-background "    
     '''
+    
+    # tesseract thresholding
+    tessThresholding = tmpOptions['opt_tess-thresholding']
+    if tessThresholding == "adaptive-otsu":
+        args=args + "--tesseract-thresholding adaptive-otsu "
+    elif tessThresholding == "sauvola":
+        args=args + "--tesseract-thresholding sauvola "
+    else:
+        args=args + "--tesseract-thresholding otsu "
+    
     # deskew
     if tmpOptions['opt_deskew'] == 'yes':
         args = args + "--deskew "
@@ -490,12 +499,13 @@ log.debug('System language identified as: ' + systemLanguage)
 tab1_layout =   [
                     [sg.T('Existing text/OCR strategy:'), sg.InputCombo(('Skip pages with text', 'Redo OCR', 'Force OCR'), default_value='Skip pages with text', key='opt_ocr', enable_events = True)],  
                     [sg.T('Deskew pages (crooked scans):', tooltip = 'Will correct pages scanned at a skewed angle by rotating them back into place.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_deskew', enable_events = True, tooltip = 'Will correct pages scanned at a skewed angle by rotating them back into place.')],
-                    [sg.T('Fix page rotation:', tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_rotate', enable_events = True, tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.')],
-                    [sg.T('Minimum page rotation confidence:'),sg.Spin(('5','10', '15', '20', '25'),initial_value = '15', key='opt_confidence', size=(2,1),enable_events=True)],
+                    [sg.T('Fix page rotation:', tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_rotate', enable_events = True, tooltip = 'Attempts to determine the correct orientation for each page and rotates the page if necessary.')],
+                    [sg.T('Minimum page rotation confidence:'),sg.Spin(('5','10', '15', '20', '25'),initial_value = '15', key='opt_confidence', size=(2,1),enable_events=True, tooltip = 'Adjust this value if you are getting too many false positives for page rotation.')],
                     [sg.T('Noise:'), sg.InputCombo(('Do nothing', 'Clean for OCR but keep original page', 'Clean for OCR and keep cleaned page'), default_value='Do nothing', key='opt_noise', enable_events = True, tooltip = 'Clean up pages before OCR. If you keep the cleaned pages review the OCRed PDF!')],
                     # Tempoarily disabled since ocrmydf v13.0.0
                     #  [sg.T('Remove background:'), sg.InputCombo(('yes', 'no'), default_value='no', key='opt_background', enable_events = True), visible=False],
                     [sg.T('Optimization level:'), sg.InputCombo(('0', '1', '2', '3'), default_value='1', key='opt_optimization', enable_events = True, tooltip = '0 = Disables optimization, 1 = Lossless optimizations, 2 + 3 = Reduced image quality ')],
+                    [sg.T('Tesseract thresholding:'), sg.InputCombo(('otsu', 'adaptive-otsu', 'sauvola'), default_value='otsu', key='opt_tess-thresholding', enable_events = True, tooltip = 'Adjust to improve OCR accuracy. Best setting depends on the scanned document\n(e.g. shadow artefacts, background colors, light or dark text). Default is otsu.\nTesseract 5.0.0+ only.')],
                     [sg.T('Output type:'), sg.InputCombo(('Standard PDF', 'PDF/A-1b', 'PDF/A-2b', 'PDF/A-3b'), default_value='PDF/A-2b', key='opt_standard', enable_events = True)],
                     [sg.T('Postfix (may overwrite original if empty!):'), sg.In('_OCR', key='opt_postfix', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Save recognized text as separate .txt file:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_sidecar', enable_events = True)]          
@@ -505,7 +515,7 @@ tab2_layout =   [
                     [sg.T('Separator pattern for QR Code (postfix is optional): <Separator_Code>|<Custom_Postfix>')],
                     [sg.T('<Custom_Postfix> is added to the filename in "Sticker Mode" if available')],
                     [sg.T('It replaces the index numbers -> You need to provide different postfixes for all files.')],
-                    [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
+                    [sg.T('Run splitter after OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output.', enable_events = True)],                  
                     [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
@@ -611,7 +621,7 @@ layout = [
          ]
 
 # Create the Window
-window = sg.Window(applicationTitle  + ' ' + version, layout, font=('Ubuntu', 11), finalize = True)
+window = sg.Window(applicationTitle  + ' ' + version, layout, font=('FreeSans', 11, 'normal'), finalize = True)
 
 # Check if config file exists and create one if none exists 
 
@@ -777,4 +787,5 @@ while True:
 
         toggleButtons()
 
+        # get the first job 
         Job = nextJob()   
