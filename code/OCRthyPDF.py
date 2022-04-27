@@ -515,7 +515,7 @@ tab2_layout =   [
                     [sg.T('Separator pattern for QR Code (postfix is optional): <Separator_Code>|<Custom_Postfix>')],
                     [sg.T('<Custom_Postfix> is added to the filename in "Sticker Mode" if available')],
                     [sg.T('It replaces the index numbers -> You need to provide different postfixes for all files.')],
-                    [sg.T('Run splitter after OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
+                    [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output.', enable_events = True)],                  
                     [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
