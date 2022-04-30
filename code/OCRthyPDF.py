@@ -28,7 +28,8 @@ import glob
 from copy import deepcopy
 from configparser import ConfigParser, NoOptionError
 from random import randint
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, tempdir
+from shutil import copytree
 import logging
 import argparse
 import darkdetect
@@ -107,7 +108,7 @@ for f in licenses:
 # Config related
 # 'background', temporarilyy diabled since ocrmypdf v13.0.0
 stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
-                 'deskew', 'rotate', 'sidecar', 'runsplitter', 'tess-thresholding',
+                 'deskew', 'rotate', 'sidecar', 'runsplitter', 'tess-thresholding', 'savesplittext',
                  'separator', 'separatorpage', 'usesourcename', 'loglevel', 'areafactor']
 
 pathOptions = ['filename','infolder','outfolder']
@@ -208,6 +209,20 @@ def writeConfig():
     with open(configini, 'w+') as configfile:
         config.write(configfile)
 
+def updateInitialFolders():
+    if window['outfolder'].get() != '':
+        window['outfolder_browse'].InitialFolder = window['outfolder'].get()
+    else:
+        window['outfolder_browse'].InitialFolder = user_home
+    if window['infolder'].get() != '':
+        window['infolder_browse'].InitialFolder = window['infolder'].get()
+    else:
+        window['infolder_browse'].InitialFolder = user_home
+    if window['filename'].get() != '':
+        window['file_browse'].InitialFolder = path.dirname(window['filename'].get()) 
+    else:
+        window['file_browse'].InitialFolder = user_home
+        
 # Just a simple popup message in a function so I can change formatting and behaviour in one place. :)
 def popUp(message):
     windowLocation = window.current_location()
@@ -254,9 +269,11 @@ def toggleButtons():
     else:
         window['stop_ocr'].update(disabled=True)
 
+
 def deleteFiles(folder):
     for file in listdir(folder):
         remove(path.join(folder, file))
+
 
 def cleanup(Job, popup=True):
     #empty queues 
@@ -266,10 +283,7 @@ def cleanup(Job, popup=True):
         ocrJobs.get()
 
     Job['ocrQueueLen']=0
-    Job['splitQueueLen']=0
-    
-    #clean tmpdir
-    deleteFiles(tmpdir.name)    
+    Job['splitQueueLen']=0 
     
     #enable buttons
     toggleButtons()
@@ -285,7 +299,7 @@ def cleanup(Job, popup=True):
 
     #Reset queue bars in case jobs were stopped by user
     window['ocr_queue_bar'].update(0)
-    window['split_queue_bar'].update(0)
+  
     log.info('Cleanup complete.')
     return Job
 
@@ -318,14 +332,17 @@ def startSplitJob (filename, Job):
     if tmpOptions['opt_usesourcename'] == 'no':
         args = args + '-d ' 
     
+    # Save txt files
+    if tmpOptions['opt_savesplittext'] == 'yes':
+        args = args + '-t '   
+    
     #  Output folder
     args = args + " -o '" + tmpdir.name + "'"
   
     commandLine = "'" + scriptRoot + "/splitter.py' '" + Job['file'] + "' " + args
     log.debug('Commandline: ' + commandLine)
     execute = shlex.split(commandLine)
-    
-    
+        
     Job['process'] = subprocess.Popen (execute,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     #make STDOUT/readline non-blocking!
     set_blocking(Job['process'].stdout.fileno(), False)
@@ -416,7 +433,7 @@ def startOCRJob (filename, Job):
     inputFilename = path.basename(Job['file'])
     outFileParts = inputFilename.rsplit('.', 1)
     outFile = path.join(tmpOptions['outfolder'], outFileParts[0] + tmpOptions['opt_postfix'] + '.' + outFileParts[1])
-    
+    Job['outfile'] = outFile 
     commandLine = "ocrmypdf --use-threads " + args + "'" + Job['file'] + "' '" + outFile + "'"
 
     execute = shlex.split(commandLine)
@@ -438,13 +455,17 @@ def startOCRJob (filename, Job):
 # checks the queues according to their priority and starts the next job
 def nextJob(previousJob=None):
     
-    # check if split produced files and add to ocrQueue, add original file if not  
+    # delete ocr'ed file if a split job ran  
     if previousJob and previousJob['type'] == 'split':
-        for file in glob.glob(tmpdir.name + '/*.pdf'):
-            ocrJobs.put(file)
-        if ocrJobs.qsize() == 0:
-            ocrJobs.put(previousJob['file'])
-    
+        remove(previousJob['file'])
+        copytree (tmpdir.name , tmpOptions['outfolder'], dirs_exist_ok=True)
+        deleteFiles(tmpdir.name)
+        
+    # check if we have to run a split job after ocr
+    if previousJob and previousJob['type'] == 'ocr':
+        if tmpOptions['opt_runsplitter'] == 'yes':
+            splitJobs.put(previousJob['outfile'])
+                      
     if not previousJob:
         log.info('Creating first job.')
         previousJob={'running': False, 'ocrQueueLen' : 0, 'splitQueueLen' : 0}
@@ -456,15 +477,13 @@ def nextJob(previousJob=None):
 
     log.debug('Checking queues for next job. OCR-queue: ' + str(ocrJobs.qsize()) + ', Split-queue:' + str(splitJobs.qsize()))
 
-    if ocrJobs.qsize() > 0:
+    if splitJobs.qsize() > 0:      
+        Job = startSplitJob (splitJobs.get(), previousJob)
+
+    elif ocrJobs.qsize() > 0:
         Job = startOCRJob (ocrJobs.get(), previousJob) 
         window['ocr_queue_bar'].update(queuePercent(ocrJobs.qsize(), previousJob['ocrQueueLen']))
-           
-    elif splitJobs.qsize() > 0:      
-        #delete no longer needed split files from temp folder prior to new split job
-        deleteFiles(tmpdir.name)
-        Job = startSplitJob (splitJobs.get(), previousJob)
-        window['split_queue_bar'].update(queuePercent(splitJobs.qsize(), previousJob['splitQueueLen']))
+
     else:
         Job = cleanup(previousJob)
         
@@ -515,11 +534,12 @@ tab2_layout =   [
                     [sg.T('Separator pattern for QR Code (postfix is optional): <Separator_Code>|<Custom_Postfix>')],
                     [sg.T('<Custom_Postfix> is added to the filename in "Sticker Mode" if available')],
                     [sg.T('It replaces the index numbers -> You need to provide different postfixes for all files.')],
-                    [sg.T('Run splitter prior to OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
+                    [sg.T('Run splitter after OCR:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_runsplitter', enable_events = True)],
                     [sg.T('Separator code (add at least this to your QR code):'), sg.In('NEXT', key='opt_separator', change_submits = True, size = (15,1), enable_events = True)],
                     [sg.T('Separator mode?:'), sg.InputCombo(('Drop separator page', 'Sticker Mode'), default_value='Drop separator page', key='opt_separatorpage', tooltip='Sticker Mode: QR Code starts new segment. Page is added to output.', enable_events = True)],                  
                     [sg.T('Use source filename in output filename?:'),sg.InputCombo(('yes', 'no'), default_value='yes', key='opt_usesourcename', enable_events = True)],
-                    [sg.T('Limit QR-code search area:'),sg.InputCombo(('1.0','0.5','0.25'), default_value='1', key='opt_areafactor', tooltip='Default: 1.0 - Multiply width and height with this factor to\nlimit the search area and speed up splitting.\n1 = Whole image(page)\n0.5 = Upper left quadrant\n0.25 = Upper left quadrant of upper left quadrant', enable_events = True)]                        
+                    [sg.T('Limit QR-code search area:'),sg.InputCombo(('1.0','0.5','0.25'), default_value='1', key='opt_areafactor', tooltip='Default: 1.0 - Multiply width and height with this factor to\nlimit the search area and speed up splitting.\n1 = Whole image(page)\n0.5 = Upper left quadrant\n0.25 = Upper left quadrant of upper left quadrant', enable_events = True)],
+                    [sg.T('Save text as separate .txt files:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_savesplittext', enable_events = True)]                        
                 ]                   
 
 tab3_layout =   [
@@ -533,17 +553,11 @@ tab3_layout =   [
 
 colQueue1 = [
                 [
-                    sg.Text('Split Job Queue:', pad = ((0,0),(0,0)))
-                ],
-                [
                     sg.Text('OCR Job Queue: ', pad = ((0,0),(4,0))) 
                 ]
             ]   
 
 colQueue2 = [
-                [
-                    sg.ProgressBar(100, key='split_queue_bar', size=(44,20))  
-                ],
                 [
                     sg.ProgressBar(100, key='ocr_queue_bar', size=(44,20))  
                 ]
@@ -584,7 +598,7 @@ col2 =  [
             [
                 sg.InputText(key='filename_short', disabled_readonly_background_color = readonly_background_color, disabled_readonly_text_color = readonly_text_color,  readonly=True, size=(52,1)), 
                 sg.InputText(key='filename', visible=False, readonly=True, enable_events=True), 
-                sg.FileBrowse(('Browse'), file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")), initial_folder=user_home)
+                sg.FileBrowse(('Browse'), key='file_browse', file_types=(("PDF", "*.pdf"),("PDF", "*.PDF")), initial_folder=user_home)
             ],
             [
                 sg.InputText(key='infolder_short', disabled_readonly_background_color = readonly_background_color, disabled_readonly_text_color = readonly_text_color, readonly=True, size=(52,1)), 
@@ -643,7 +657,8 @@ if len(config.read(configini)) == 0:
     writeConfig()
 else:
     readConfig()  
-    
+
+updateInitialFolders()
 
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
@@ -741,6 +756,7 @@ while True:
             inFilePath = path.dirname(values['filename'])
             window['outfolder'].update(value = inFilePath)
             window['outfolder_short'].update(value = limitFilenameLen(inFilePath))
+        updateInitialFolders()
 
     if event == 'infolder' and not values['infolder'] == '' : 
         inFolderPath = values['infolder']
@@ -753,16 +769,18 @@ while True:
         if values['outfolder'] == '':
             window['outfolder'].update(value =  inFolderPath)
             window['outfolder_short'].update(value = limitFilenameLen( inFolderPath))
+        updateInitialFolders()
 
     if event == 'outfolder' and not values['outfolder'] == '' : 
         # Shorten filename so it fits in the input text field
         window['outfolder_short'].update(value = limitFilenameLen(values['outfolder'])) 
+        updateInitialFolders()
        
     if event.startswith('opt_') or event in pathOptions:
         writeConfig()
       
     if event == 'start_ocr':
-        log.info('OCR queues started')
+        log.info('OCR queue started')
         fileList=[]
         
         if values['filename'] != '':
@@ -773,13 +791,9 @@ while True:
             for file in glob.glob(values['infolder'] + '/*.PDF'):
                 fileList.append(file)
         
-        if values['opt_runsplitter'] == 'yes':
-            fillQueue = splitJobs
-        else: 
-            fillQueue = ocrJobs
-            
         for file in fileList:
-            fillQueue.put(file) 
+            ocrJobs.put(file) 
+        
 
         #copy values into temporary object to prevent user from changing
         #options of already running jobs 

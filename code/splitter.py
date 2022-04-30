@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#Version 0.6
+#Version 0.7
 
 import logging
 import argparse
@@ -93,8 +93,22 @@ def analyzePage(PDF, pageNumber, separator='NEXT', mode='QR', cropfactor=1):
 
     return (pageNumber,separatorCode)
 
+def savePDFTextFile(PDFfile):
+    '''Save Text in PDF file to a text file'''
+    logging.debug('Saving text %s.txt file' % PDFfile) 
+    try:
+        with open(PDFfile, "rb") as fp:
+            pdfAsText = pdftotext.PDF(fp)        
+            with open(PDFfile+'.txt', 'w') as f:
+                for page in pdfAsText:
+                    f.write('%s\n' % page)
+    except Exception as error:
+        logging.critical('Saving text file %s failed. %e' % (PDFfile, error))
+        return
+    logging.debug('Text file saved')
+    
 
-def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode=False, dropName=False, workers=0, skipRewrite=False, cropfactor=1):
+def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode=False, dropName=False, workers=0, skipRewrite=False, cropfactor=1, extractText=False):
     startSplitTime = time.time()   
     if not skipRewrite:
         logging.debug('Rewriting PDF %s to temporary file.' % filename)
@@ -226,8 +240,11 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode
                     splitPDF.close()
                 except:
                     logging.critical('Saving split PDF %s failed.' % saveAs)
-                    #sys.exit("Unable to write split file to output folder.")
+                    continue
                 
+                if extractText==True:
+                    savePDFTextFile (saveAs)
+                          
         #Separator pages are dropped    
         else:
             logging.debug('Assembling PDFs in "Separator Page Mode"')
@@ -263,7 +280,11 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode
                         splitPDF.close() 
                     except:
                         logging.critical('Saving PDF %s failed.' % saveAs)
-                        #sys.exit("Unable to write split file to output folder.")
+                        continue
+                                    
+                if extractText==True:
+                    savePDFTextFile (saveAs)
+                    
                 else:
                     logging.debug('Segment %s has no pages. Separator on first page, last page or on consecutive pages?'% (str(filenamePostfix)))
                 
@@ -321,6 +342,8 @@ to the filename.""")
                         help='Select used separator: QR (default), BARCODE, KEYWORD')
     parser.add_argument('-af', '--area-factor', type=float, choices=[(1 * x / 4 ) for x in range(1, 5)], default=1.0,
                         help='Speed up QR/Barcode search by limiting search area. Origin is top left corner. Default is 1.0 (whole page). E.g. 0.5 is upper left quadrant.')
+    parser.add_argument('-t', '--extract-text', action='store_true',
+                    help='Save text in separate text file')
     parser.add_argument('-o', '--output-folder', metavar='/path/to/output/folder', type=str, 
                         help='Where to save the split files? Default: Same as input folder')
     parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEBUG'],
@@ -335,5 +358,5 @@ to the filename.""")
     else:
         raise ValueError('Invalid log level: %s' % loglevel)
         
-    for file in splitPDF (args.filename, args.output_folder, args.separator, args.mode, args.sticker_mode, args.drop_filename, args.workers, args.skip_rewrite, args.area_factor):
+    for file in splitPDF (args.filename, args.output_folder, args.separator, args.mode, args.sticker_mode, args.drop_filename, args.workers, args.skip_rewrite, args.area_factor, args.extract_text):
         print(file)
