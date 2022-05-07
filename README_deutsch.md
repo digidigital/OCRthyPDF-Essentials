@@ -49,7 +49,7 @@ Der Aktivitätsbalken neben den Buttons blinkt, während die OCR läuft.
 
 Der Splitter ermöglicht es dir, eine PDF-Datei anhand eines Barcodes / QR-Codes in einzelne Dateien aufzuteilen. Das ist praktisch, wenn du viele (mehrseitige) Dokumente scannen musst und nicht jedes Dokument einzeln in den Scanner legen möchtest. Lege einfach eine [Tennseite](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) zwischen die einzelnen Dokumente und scanne sie auf einmal!
 
-Um den Splitter zu aktivieren, setze „Run splitter prior to OCR“ auf „yes“.
+Um den Splitter zu aktivieren, setze „Run splitter after OCR“ auf „yes“.
 
 Im nächsten Feld musst du den Trenntext angeben. Der Splitter versucht, auf jeder Seite QR-Codes zu finden und vergleicht deren Inhalt mit diesem Text.
 
@@ -64,7 +64,7 @@ Du kannst das Muster <SEPARATOR_TEXT>|<CUSTOM_POSTFIX> in deinen QR-Codes verwen
 
 :pushpin: Wenn du die Option wählst, den Quelldateinamen nicht im Ausgabedateinamen zu verwenden, kannst du die Dateinamen mit Hilfe der benutzerdefinierten Postfixe festlegen (Dann auch das Postfix-Feld in der Registerkarte ‚Optionen‘ leer lassen).
 
-Bevor Splitter mit der Analyse der Seiten einer PDF-Datei beginnt, wird die Quell-PDF-Datei mit Ghostscript umgeschrieben, um einige häufige Probleme mit PDF-Dateien, die von Scannern/MFPs erzeugt werden, zu umgehen. Splitter sucht dann in der umgeschriebenen Datei nach QR-Codes, setzt aber die geteilten Dateien direkt aus der Quelldatei zusammen. Du kannst die Option „Assemble split files from rewritten source file?“ verwenden, um Splitter anzuweisen, die Seiten aus der umgeschriebenen/reparierten Version zu übernehmen. 
+Bevor Splitter mit der Analyse der Seiten einer PDF-Datei beginnt, wird die Quell-PDF-Datei mit Ghostscript umgeschrieben, um einige häufige Probleme mit PDF-Dateien, die von Scannern/MFPs erzeugt werden, zu umgehen. Splitter sucht dann in der umgeschriebenen Datei nach QR-Codes, setzt aber die geteilten Dateien direkt aus der Quelldatei zusammen.  
 
 :stop_sign: Hinweis: Wenn du gescannte Dokumente aufteilst, die lediglich Bitmap-Bilder enthalten, sollte die Aktivierung dieser Option kein Problem darstellen. Wenn du jedoch Dokumente aufteilst, die auch andere Elemente enthalten (Text, Schriftarten, Vektorzeichnungen usw.), kann das Ergebnis von der Quelle abweichen und du verlierst ggf. einige Inhalte oder Schriften!
 
@@ -72,11 +72,16 @@ Bevor Splitter mit der Analyse der Seiten einer PDF-Datei beginnt, wird die Quel
 
 In der Registerkarte 'Languages' kannst du die Sprachen (über 100 werden unterstützt!) auswählen, die in deinen Dokumenten genutzt werden. Die Standardauswahl ist Englisch und die Sprache deiner Desktop-Umgebung. Da das Ergebnis der OCR **stark** von dieser Auswahl abhängt, solltest du alle Sprachen auswählen, die du benötigst, und alle anderen Sprachen abwählen!
 
+Sprachen mit einem "best-" Prefix sollten bessere Ergebnisse erzielen, dafür dauert die Texterkennung länger.
+
+Du kannst den Speicherort einer Textdatei für benutzerdefinierte Wörter angeben. Dies ist eine Liste von Wörtern (ein Wort in jeder Zeile), die Tesseract
+bei der OCR zusätzlich zu seinen Standard-Sprachwörterbüchern nutzen soll. Dies kann die Texterkennungsqualität - insbesondere bei technischen oder fachspezifischen Dokumenten - verbessern.
+
 ![OCRthyPDF GUI Console-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/4.png)
 
 In der Konsole kannst du die Ausgabe der Prozesse sehen, die „unter der Haube“ arbeiten. Dies ist hilfreich, falls die Texterkennung anders als erwartet ausfällt oder die Anwendung mit einem Fehlercode die Dokumentenbearbeitung abbricht. du kannst zwischen den Logleveln „INFO“ (Statusmeldungen, wenn alles wie erwartet funktioniert) und „DEBUG“ (viele detaillierte Informationen) wählen. Standardmäßig zeigt die Konsole nur die Ausgabe des letzten Unterprozesses an und wird bereinigt, wenn ein neuer Unterprozess gestartet wird. Du kannst die Konsole jedoch auch so einstellen, dass sie die Informationen aller Unterprozesse eines OCR-Auftrages ohne Bereinigung anzeigt.
 
-Die beiden Balken am unteren Rand zeigen den Status der Warteschlange für Split-Aufträge (Aufteilen) und die Warteschlange für OCR-Aufträge (Texterkennung) an. Die „Warteschlangen“ beziehen sich jeweils auf Dokumente, die auf ihre Verarbeitung warten.
+Der Balken am unteren Rand zeigt den Status der Warteschlang für OCR-Aufträge (Texterkennung) an. Die „Warteschlange“ bezieht sich auf Dokumente, die auf ihre Verarbeitung warten.
 
 # Weiterführende Links
 
