@@ -54,9 +54,9 @@ The activity indicator bar flashes while OCR is running.
 
 The splitter enables you to split a PDF-file into separate files based on a separator barcode / QR-Code. This is very handy if you have to scan a lot of (multi-page) documents and don't want to scan each document separately. Just put a [separator page](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) between each document and scan them at once! 
 
-In order to avctivate the splitter set "Run splitter prior to OCR" to "yes".
+In order to avctivate the splitter set "Run splitter after OCR" to "yes".
 
-In the next field you have to specify a separator text. The splitter tries to find a QR code on each page and compares its content with this text. 
+In the next field you have to specify a separator text. The splitter tries to find a QR code on each page and compares it's content with this text. 
 
 The next switch selects the separator mode. By default, the separation page is omitted and not included in the output files. In Sticker Mode
 a QR-Code starts a new segment and the page will be added to the output. Each segment/document will be saved with a segment number as postfix.
@@ -71,16 +71,24 @@ postfixes in each code since no segment numbers are added in this mode if a cust
 
 :pushpin: If you select the option not to use the source filename in the output filename you are able to set the filenames by using the custom postfixes (if you leave the postfix field in the options tab blank). 
 
-Before Splitter starts analyzing the pages of a PDF file, the source PDF file is rewritten with Ghostscript to work around some common problems with PDF files created by scanners/MFPs. Splitter looks for QR codes in the rewritten file, but assembles the split files directly from the source file. You can use the "Assemble split files from rewritten source file?" option to tell Splitter to take the pages from the rewritten/repaired version. If you are splitting scanned documents that contain bitmap images, this should be safe. If you split documents that contain other elements (text, fonts, vector drawings, etc.), the result may differ from the source!
+Before Splitter starts analyzing the pages of a PDF file, the source PDF file is rewritten with Ghostscript to work around some common problems with PDF files created by scanners/MFPs. Splitter looks for QR codes in the rewritten file, but assembles the split files directly from the source file. 
+
+You can limit the QR-code search area to speed up splitting. 1 -> Search whole page, 0.5 -> search upper left quadrant of page, 0.25 -> search upper left quadrant of upper left quadrant.
+
+If you need the raw text of the final PDF-files set "Save text as separate .txt files" to "yes". 
 
 ![OCRthyPDF GUI Language-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/3.png)
 
 The Language tab lets you select the languages present in your documents. The default selection is English and the language of your desktop environment. Since the result of OCR **strongly** depends on this selection, you should select all languages you need and deselect all languages you don't! 
 
+Language options with the "best-" prefix should give better results than the default options, but OCR may take longer. 
+
+You can specify a location of a user words text file. This is a list of words (one word in each line) Tesseract should consider while performing OCR in addition to its standard language dictionaries. This can improve OCR quality especially for specialized and technical documents.
+
 ![OCRthyPDF GUI Console-Tab](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/4.png)
 
 In the console you can see the output of the processes working "under the hood". This is helpful in case the results are different than expected or the OCR terminates with an error code. You can select the log levels "INFO" (status messages when everything works as expected) and "DEBUG" (a lot of detailed information). By default, the console shows the output of the last subprocess and is cleaned up when a new subprocess is started. You can set the console to show the information of all subprocesses without cleanup.
 
-The two bars at the bottom indicate the status of the Split Job queue and the OCR job queue. "Queue" refers to documents waiting to be processed.    
+The bars at the bottom indicates the status of the OCR job queue. "Queue" refers to documents waiting to be processed.    
 
 A German version of this text can be found [here](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/README_deutsch.md).
