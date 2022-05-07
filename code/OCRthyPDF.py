@@ -35,6 +35,9 @@ import argparse
 import darkdetect
 import uuid
 
+
+iconstring=b'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'
+
 parser = argparse.ArgumentParser(description="OCR and QR / Barcode based splitter for PDF files")
 
 parser.add_argument('--log', default="WARNING", choices=['WARNING', 'INFO', 'DEBUG'],
@@ -107,7 +110,7 @@ for f in licenses:
 
 # Config related
 # 'background', temporarilyy diabled since ocrmypdf v13.0.0
-stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence', 
+stringOptions = ['ocr', 'noise', 'optimization', 'postfix', 'standard', 'confidence','userwordsfilename', 
                  'deskew', 'rotate', 'sidecar', 'runsplitter', 'tess-thresholding', 'savesplittext',
                  'separator', 'separatorpage', 'usesourcename', 'loglevel', 'areafactor']
 
@@ -397,7 +400,10 @@ def startOCRJob (filename, Job):
     if tmpOptions['opt_background'] == 'yes':
         args = args + "--remove-background "    
     '''
-    
+    # tesseract user words
+    if len(tmpOptions['opt_userwordsfilename'])>0:
+         args=args + '--user-words "%s" ' % tmpOptions['opt_userwordsfilename']
+
     # tesseract thresholding
     tessThresholding = tmpOptions['opt_tess-thresholding']
     if tessThresholding == "adaptive-otsu":
@@ -542,7 +548,7 @@ tab2_layout =   [
                     [sg.T('Save text as separate .txt files:'),sg.InputCombo(('yes', 'no'), default_value='no', key='opt_savesplittext', enable_events = True)]                        
                 ]                   
 
-tab3_layout =   [
+tab3_col1 =   [
                     [
                         sg.T('Select document language(s):')
                     ],
@@ -550,6 +556,32 @@ tab3_layout =   [
                         sg.Listbox(values=languages, key='opt_languages', select_mode='multiple', highlight_background_color = highlight_bg_color, highlight_text_color = highlight_t_color, enable_events = True, expand_x=True, expand_y =True)# xsize=(15, 12))
                     ]
                 ]   
+
+tab3_col2 =   [
+                    [
+                        sg.T('Advanced language options')
+                    ],
+                    [
+                        sg.Text('''Specify the location of a Tesseract user words text file.
+This is a list of words (one word in each line) Tesseract
+should consider while performing OCR in addition to its 
+standard language dictionaries. This can improve OCR
+quality especially for specialized and technical documents.''')
+                    ],
+                    [ 
+                        sg.InputText(key='opt_userwordsfilename', size=(28), visible=True, readonly=True, disabled_readonly_background_color = readonly_background_color, disabled_readonly_text_color = readonly_text_color, enable_events=True), 
+                        sg.FileBrowse(('Browse'), key='userwordfile_browse',initial_folder=user_home),
+                        sg.Button(('Reset'), key='reset_userfile')
+                    ]
+
+                ]  
+
+tab3_layout =   [
+                    [            
+                        sg.Column(tab3_col1, expand_y=True, vertical_alignment = 't'), 
+                        sg.Column(tab3_col2, vertical_alignment = 't')      
+                    ]
+                ]  
 
 colQueue1 = [
                 [
@@ -620,7 +652,7 @@ layout = [
             
             [
                 sg.TabGroup([[
-                    sg.Tab('Options', tab1_layout), 
+                    sg.Tab('OCR', tab1_layout), 
                     sg.Tab('Splitter', tab2_layout),
                     sg.Tab('Languages', tab3_layout),
                     sg.Tab('Console', tab4_layout),
@@ -635,7 +667,8 @@ layout = [
          ]
 
 # Create the Window
-window = sg.Window(applicationTitle  + ' ' + version, layout, font=('FreeSans', 11, 'normal'), finalize = True)
+
+window = sg.Window(applicationTitle  + ' ' + version, layout, icon=iconstring , font=('FreeSans', 11, 'normal'), finalize = True)
 
 # Check if config file exists and create one if none exists 
 
@@ -757,6 +790,9 @@ while True:
             window['outfolder'].update(value = inFilePath)
             window['outfolder_short'].update(value = limitFilenameLen(inFilePath))
         updateInitialFolders()
+
+    if event =='reset_userfile':
+        window['opt_userwordsfilename'].update(value='')
 
     if event == 'infolder' and not values['infolder'] == '' : 
         inFolderPath = values['infolder']

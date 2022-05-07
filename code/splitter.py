@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#Version 0.7
+#Version 0.7.1
 
 import logging
 import argparse
@@ -94,7 +94,7 @@ def analyzePage(PDF, pageNumber, separator='NEXT', mode='QR', cropfactor=1):
     return (pageNumber,separatorCode)
 
 def savePDFTextFile(PDFfile):
-    '''Save Text in PDF file to a text file'''
+    '''Save text in PDF file to a text file'''
     logging.debug('Saving text %s.txt file' % PDFfile) 
     try:
         with open(PDFfile, "rb") as fp:
@@ -238,12 +238,16 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode
                 try:
                     splitPDF.save(saveAs)
                     splitPDF.close()
-                except:
-                    logging.critical('Saving split PDF %s failed.' % saveAs)
+                except Exception as e:
+                    logging.critical('Saving split PDF %s failed. %s' % (saveAs, e))
                     continue
                 
-                if extractText==True:
-                    savePDFTextFile (saveAs)
+                try:                
+                        if extractText==True:
+                            savePDFTextFile (saveAs)
+                except Exception as e:
+                    logging.critical('Saving PDF %s failed. %s' % (saveAs, e))
+                    continue
                           
         #Separator pages are dropped    
         else:
@@ -278,12 +282,18 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode
                     try:
                         splitPDF.save(saveAs)
                         splitPDF.close() 
-                    except:
-                        logging.critical('Saving PDF %s failed.' % saveAs)
+                    except Exception as e:
+                        logging.critical('Saving raw text of split PDF %s failed. %s' % (saveAs, e))
                         continue
-                                    
-                if extractText==True:
-                    savePDFTextFile (saveAs)
+
+                    try:                
+                        if extractText==True:
+                            savePDFTextFile (saveAs)
+                    except Exception as e:
+                        logging.critical('Saving raw text of split PDF %s failed. %s' % (saveAs, e))
+                        continue
+                    
+                    
                     
                 else:
                     logging.debug('Segment %s has no pages. Separator on first page, last page or on consecutive pages?'% (str(filenamePostfix)))
@@ -301,6 +311,11 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode
             copy2(filename, saveAs)
             fileList.append(saveAs)
             logging.info('%s copied to %s' % (filename, saveAs)) 
+            try:                
+                if extractText==True:
+                    savePDFTextFile (saveAs)
+            except Exception as e:
+                logging.critical('Saving raw text of PDF %s failed. %s' % (saveAs, e))             
         except:
             logging.critical('Writing source file to output folder failed')    
 
