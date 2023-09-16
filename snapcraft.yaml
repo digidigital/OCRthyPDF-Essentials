@@ -144,7 +144,7 @@ parts:
       snapcraftctl build
       
       pip install -U pip wheel setuptools
-      pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect
+      pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
