@@ -1,6 +1,6 @@
 name: ocrthypdf
 title: OCRthyPDF Essentials
-base: core20 # the base snap is the execution environment for this snap
+base: core22 # the base snap is the execution environment for this snap
 adopt-info: ocrthypdf
 summary: Make your PDF files text-searchable (A GUI for OCRmyPDF)
 description: |
