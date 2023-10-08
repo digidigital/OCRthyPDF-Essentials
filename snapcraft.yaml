@@ -34,7 +34,7 @@ apps:
     command: usr/bin/snapcraft-preload $SNAP/bin/python3.9 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
     desktop: $SNAPCRAFT_PROJECT_DIR/gui/ocrthypdf.desktop
-    extensions: [gnome-3-38]
+    extensions: [gnome]
     plugs:
       - home
       - removable-media
