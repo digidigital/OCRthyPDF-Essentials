@@ -28,14 +28,15 @@ environment:
     GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
     GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
     SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
+    CRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
     LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib
-    PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+    PATH: $PATH:$SNAP/bin:$SNAP/usr/bin
 
 apps:
   ocrthypdf:
     command: usr/bin/snapcraft-preload $SNAP/bin/python3.10 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
-    desktop: $SNAPCRAFT_PROJECT_DIR/gui/ocrthypdf.desktop
+    desktop: $CRAFT_PROJECT_DIR/gui/ocrthypdf.desktop
     extensions: [gnome]
     plugs:
       - home
@@ -67,7 +68,7 @@ parts:
         - lib32stdc++6  
       override-build: |
         snapcraftctl build
-        ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
+        ln -sf ../usr/lib/libsnapcraft-preload.so $CRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
 
   pull-parts:
     plugin: nil
@@ -101,6 +102,7 @@ parts:
     source-type: git
 
     stage-packages: 
+      - python3.10
       - python3.10-venv
       - python3-tk
       - fonts-freefont-ttf
@@ -117,8 +119,8 @@ parts:
       - poppler-utils
     
     override-pull: |
-      snapcraftctl pull  
-      snapcraftctl set-version "$(git describe --tags)"
+      craftctl pull  
+      craftctl set-version "$(git describe --tags)"
     
     build-packages:
       - build-essential
@@ -128,9 +130,9 @@ parts:
       - pipenv
 
     build-environment:
-      - SNAPCRAFT_PYTHON_INTERPRETER: python3.10  
-      # python3.10 lives in $SNAPCRAFT_PART_INSTALL/bin
-      - PATH: $SNAPCRAFT_PART_INSTALL/bin:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/:$PATH   
+      - PARTS_PYTHON_INTERPRETER: python3.10  
+      # python3.10 lives in $SCRAFT_PART_INSTALL/bin
+      - PATH: $CRAFT_PART_INSTALL/bin:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/:$PATH   
       - CPATH:  /usr/include/x86_64-linux-gnu/c++/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/
       - PYTHONPATH: ''
 
@@ -138,12 +140,12 @@ parts:
       # Work around a bug in snapcraft python plugin / gnome 3.38 extension
       # https://forum.snapcraft.io/t/build-a-snap-with-any-version-of-python-i-want/10420/8
           
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/python3.10/distutils
-      cp -r /usr/lib/python3.10/distutils $SNAPCRAFT_PART_INSTALL/usr/lib/python3.10/distutils
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include/
-      cp -r /usr/include/python3.10 $SNAPCRAFT_PART_INSTALL/usr/include/python3.10    
+      rm -rf $CRAFT_PART_INSTALL/usr/lib/python3.10/distutils
+      cp -r /usr/lib/python3.10/distutils $CRAFT_PART_INSTALL/usr/lib/python3.10/distutils
+      mkdir -p $CRAFT_PART_INSTALL/usr/include/
+      cp -r /usr/include/python3.10 $CRAFT_PART_INSTALL/usr/include/python3.10    
       
-      snapcraftctl build
+      craftctl build
       
       pip install -U pip wheel setuptools
       pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect rich
@@ -151,9 +153,9 @@ parts:
 
       # Apply shebang rewrite as done by snapcraft
       
-      find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
+      find $CRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
         sed -i                                                                                \
-          "s|^#!${SNAPCRAFT_PART_INSTALL}/bin/python3.10$|#!/usr/bin/env python3|" {} \;
+          "s|^#!${CRAFT_PART_INSTALL}/bin/python3.10$|#!/usr/bin/env python3|" {} \;
       
       # debug
-      find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;
+      find $CRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;
