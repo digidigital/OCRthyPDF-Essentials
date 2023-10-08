@@ -22,7 +22,7 @@ package-repositories:
    ppa: alex-p/tesseract-ocr5
 
 environment:
-    PYTHONPATH: $SNAP/usr/bin/python3.9
+    PYTHONPATH: $SNAP/usr/bin/python3.10
     TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
     GS_LIB: $SNAP/usr/share/ghostscript/Init 
     GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
@@ -31,7 +31,7 @@ environment:
 
 apps:
   ocrthypdf:
-    command: usr/bin/snapcraft-preload $SNAP/bin/python3.9 $SNAP/code/OCRthyPDF.py
+    command: usr/bin/snapcraft-preload $SNAP/bin/python3.10 $SNAP/code/OCRthyPDF.py
     command-chain: [bin/debian-multiarch-triplet-provider-launch, bin/tcltk-launch]
     desktop: $SNAPCRAFT_PROJECT_DIR/gui/ocrthypdf.desktop
     extensions: [gnome]
@@ -99,7 +99,7 @@ parts:
     source-type: git
 
     stage-packages: 
-      - python3.9-venv
+      - python3.10-venv
       - python3-tk
       - fonts-freefont-ttf
       - tcl
@@ -120,14 +120,14 @@ parts:
     
     build-packages:
       - build-essential
-      - python3.9-venv
-      - python3.9-dev
+      - python3.10-venv
+      - python3.10-dev
       - libpoppler-cpp-dev  
       - pipenv
 
     build-environment:
-      - SNAPCRAFT_PYTHON_INTERPRETER: python3.9   
-      # python3.9 lives in $SNAPCRAFT_PART_INSTALL/bin
+      - SNAPCRAFT_PYTHON_INTERPRETER: python3.10  
+      # python3.10 lives in $SNAPCRAFT_PART_INSTALL/bin
       - PATH: $SNAPCRAFT_PART_INSTALL/bin:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/:$PATH   
       - CPATH:  /usr/include/x86_64-linux-gnu/c++/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:usr/lib/gcc/x86_64-linux-gnu/:/usr/include/c++/9/:/usr/include/c++/
       - PYTHONPATH: ''
@@ -136,10 +136,10 @@ parts:
       # Work around a bug in snapcraft python plugin / gnome 3.38 extension
       # https://forum.snapcraft.io/t/build-a-snap-with-any-version-of-python-i-want/10420/8
           
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/python3.9/distutils
-      cp -r /usr/lib/python3.9/distutils $SNAPCRAFT_PART_INSTALL/usr/lib/python3.9/distutils
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/python3.10/distutils
+      cp -r /usr/lib/python3.10/distutils $SNAPCRAFT_PART_INSTALL/usr/lib/python3.10/distutils
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include/
-      cp -r /usr/include/python3.9 $SNAPCRAFT_PART_INSTALL/usr/include/python3.9    
+      cp -r /usr/include/python3.10 $SNAPCRAFT_PART_INSTALL/usr/include/python3.10    
       
       snapcraftctl build
       
@@ -151,7 +151,7 @@ parts:
       
       find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
         sed -i                                                                                \
-          "s|^#!${SNAPCRAFT_PART_INSTALL}/bin/python3.9$|#!/usr/bin/env python3|" {} \;
+          "s|^#!${SNAPCRAFT_PART_INSTALL}/bin/python3.10$|#!/usr/bin/env python3|" {} \;
       
       # debug
       find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;
