@@ -80,7 +80,7 @@ parts:
       - ghostscript
       - curl
     override-prime: |
-      snapcraftctl prime
+      craftctl prime
 
       gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
       ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
