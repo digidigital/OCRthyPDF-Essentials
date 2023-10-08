@@ -67,7 +67,7 @@ parts:
       stage-packages:
         - lib32stdc++6  
       override-build: |
-        snapcraftctl build
+        craftctl default
         ln -sf ../usr/lib/libsnapcraft-preload.so $CRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
 
   pull-parts:
@@ -80,7 +80,7 @@ parts:
       - ghostscript
       - curl
     override-prime: |
-      craftctl prime
+      craftctl default
 
       gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
       ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
@@ -119,7 +119,7 @@ parts:
       - poppler-utils
     
     override-pull: |
-      craftctl pull  
+      craftctl default  
       craftctl set-version "$(git describe --tags)"
     
     build-packages:
@@ -145,7 +145,7 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/usr/include/
       cp -r /usr/include/python3.10 $CRAFT_PART_INSTALL/usr/include/python3.10    
       
-      craftctl build
+      craftctl default
       
       pip install -U pip wheel setuptools
       pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect rich
