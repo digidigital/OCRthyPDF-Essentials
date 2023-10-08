@@ -29,6 +29,7 @@ environment:
     GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
     SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
     LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib
+    PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
 
 apps:
   ocrthypdf:
