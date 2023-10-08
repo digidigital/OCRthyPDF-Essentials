@@ -112,7 +112,7 @@ parts:
       - libnspr4
       - libnss3
       - libpoppler-cpp0v5
-      - libpoppler97
+      - poppler
     
     override-pull: |
       snapcraftctl pull  
