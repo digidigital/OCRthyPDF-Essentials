@@ -129,7 +129,13 @@ def splitPDF(filename:str, outpath:str, separator='NEXT', mode='QR', stickerMode
        
         logging.debug(command)     
         try:  
-            subprocess.run(command) 
+            gs_process=subprocess.run(command) 
+            logging.debug(gs_process)
+            logging.debug(gs_process.args)
+            logging.debug(gs_process.returncode)
+            logging.debug(gs_process.stdout)
+            ls_process=subprocess.run(shlex.split("ls -l " + tempSourceDir.name)
+            logging.debug(ls_process.stdout)
             logging.debug('Rewriting completed after %d seconds.'%(int(time.time() - startSplitTime)))
         except Exception as error:
             logging.debug('Rewriting failed. Is Ghostscript installed and in PATH? %s' % error)
