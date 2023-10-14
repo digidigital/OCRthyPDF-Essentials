@@ -20,8 +20,6 @@ architectures: [amd64]
 package-repositories:
  - type: apt
    ppa: alex-p/tesseract-ocr5
-
-package-repositories:
  - type: apt
    ppa: alex-p/jbig2enc
 
