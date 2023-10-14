@@ -20,6 +20,8 @@ architectures: [amd64]
 package-repositories:
  - type: apt
    ppa: alex-p/tesseract-ocr5
+ - type: apt
+   ppa: alex-p/jbig2enc
 
 environment:
     PYTHONPATH: $SNAP/usr/bin/python3.9
@@ -124,6 +126,7 @@ parts:
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
+      - jbig2enc
     
     override-pull: |
       snapcraftctl pull  
