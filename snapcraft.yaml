@@ -114,7 +114,6 @@ parts:
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
-      - ocrmypdf
     
     override-pull: |
       snapcraftctl pull  
@@ -146,8 +145,7 @@ parts:
       snapcraftctl build
       
       pip install -U pip wheel setuptools
-      # pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect rich
-      pip install pdftotext PySimpleGUI pikepdf pyzbar darkdetect rich
+      pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
