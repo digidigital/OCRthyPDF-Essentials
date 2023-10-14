@@ -17,16 +17,16 @@ compression: lzo
 grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
-package-repositories:
- - type: apt
-   ppa: alex-p/tesseract-ocr5
+#package-repositories:
+# - type: apt
+#   ppa: alex-p/tesseract-ocr5
 
 environment:
     PYTHONPATH: $SNAP/usr/bin/python3.9
-    TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
-    GS_LIB: $SNAP/usr/share/ghostscript/Init 
-    GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
-    GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
+    #TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
+    #GS_LIB: $SNAP/usr/share/ghostscript/Init 
+    #GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
+    #GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
     SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
 
 apps:
@@ -67,32 +67,32 @@ parts:
         snapcraftctl build
         ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
 
-  pull-parts:
-    plugin: nil
-    stage-packages: 
-      - ghostscript
-      - gsfonts
-      - icc-profiles-free 
-      - tesseract-ocr-all
-    build-packages: 
-      - ghostscript
-      - curl
-    override-prime: |
-      snapcraftctl prime
+  #pull-parts:
+  #  plugin: nil
+  #  stage-packages: 
+  #    - ghostscript
+  #    - gsfonts
+  #    - icc-profiles-free 
+  #    - tesseract-ocr-all
+  #  build-packages: 
+  #    - ghostscript
+  #    - curl
+  #  override-prime: |
+  #    snapcraftctl prime
 
-      gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
-      ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
+  #    gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
+  #    ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
 
-      gsfontpath=$(gs -h | grep  Resource/Font | tr -d ' ':)
-      ln -s -f ${gsfontpath/\/usr\/share\/ghostscript/.} .${gsfontpath}/../../../Font
+  #    gsfontpath=$(gs -h | grep  Resource/Font | tr -d ' ':)
+  #    ln -s -f ${gsfontpath/\/usr\/share\/ghostscript/.} .${gsfontpath}/../../../Font
 
-      tessdatapath=$(find ./ -iname tessdata)                                  
-      ln -s -f ${tessdatapath/usr\/share\/tesseract-ocr\//} ${tessdatapath}/../../tessdata
+  #    tessdatapath=$(find ./ -iname tessdata)                                  
+  #    ln -s -f ${tessdatapath/usr\/share\/tesseract-ocr\//} ${tessdatapath}/../../tessdata
       
-      curl --output "${tessdatapath}/best-#1.traineddata" "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/main/{deu,eng,fra,spa,por,ita,rus,ukr,jpn,jpn_vert,ara,hin,pol}.traineddata" 
+  #    curl --output "${tessdatapath}/best-#1.traineddata" "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/main/{deu,eng,fra,spa,por,ita,rus,ukr,jpn,jpn_vert,ara,hin,pol}.traineddata" 
 
-      # debug
-      ls -l ${tessdatapath}
+  #    # debug
+  #    ls -l ${tessdatapath}
     
   ocrthypdf:
     plugin: python
