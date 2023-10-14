@@ -100,8 +100,10 @@ parts:
   pngquant:
     plugin: nil
     override-build: |
-      wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.12.2-1_amd64.deb
-      dpkg -x pngquant_2.12.2-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
+      wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.17.0-1_amd64.deb
+      dpkg -x pngquant_2.17.0-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
+      wget http://archive.ubuntu.com/ubuntu/pool/main/libi/libimagequant/libimagequant-dev_2.17.0-1_amd64.deb
+      dpkg -x libimagequant-dev_2.17.0-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
 
     build-packages:
       - dpkg
@@ -119,6 +121,7 @@ parts:
       - tcl
       - libxml2 
       # - pngquant 
+      # - libimagequant0
       - unpaper 
       - qpdf 
       - zlib1g 
@@ -127,7 +130,6 @@ parts:
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
-      - libimagequant0
       - jbig2enc
     
     override-pull: |
