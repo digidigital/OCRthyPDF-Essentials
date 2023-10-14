@@ -20,6 +20,8 @@ architectures: [amd64]
 package-repositories:
  - type: apt
    ppa: alex-p/tesseract-ocr5
+
+package-repositories:
  - type: apt
    ppa: alex-p/jbig2enc
 
@@ -126,6 +128,7 @@ parts:
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
+      - libimagequant
       - jbig2enc
     
     override-pull: |
