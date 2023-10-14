@@ -103,7 +103,7 @@ parts:
       wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.17.0-1_amd64.deb
       dpkg -x pngquant_2.17.0-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
       wget http://archive.ubuntu.com/ubuntu/pool/main/libi/libimagequant/libimagequant0_2.17.0-1_amd64.deb 
-      dpkg -x /libimagequant0_2.17.0-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
+      dpkg -x libimagequant0_2.17.0-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
 
     build-packages:
       - dpkg
