@@ -71,6 +71,7 @@ parts:
     plugin: nil
     stage-packages: 
       - ghostscript
+      - gsfonts
       - icc-profiles-free 
       - tesseract-ocr-all
     build-packages: 
