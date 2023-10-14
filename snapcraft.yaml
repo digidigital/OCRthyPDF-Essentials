@@ -97,13 +97,13 @@ parts:
       ls -l ${tessdatapath}
   
   # for some reason building with core20 just installs v 2.12.0
-  pngquant:
-    plugin: nil
-    override-build: |
-      wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.13.1-1_amd64.deb
-      dpkg -x pngquant_2.13.1-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
-      wget http://archive.ubuntu.com/ubuntu/pool/main/libi/libimagequant/libimagequant0_2.12.2-1.1_amd64.deb
-      dpkg -x libimagequant0_2.12.2-1.1_amd64.deb $SNAPCRAFT_PART_INSTALL/
+  # pngquant:
+  #  plugin: nil
+  #  override-build: |
+  #    wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.13.1-1_amd64.deb
+  #    dpkg -x pngquant_2.13.1-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
+  #    wget http://archive.ubuntu.com/ubuntu/pool/main/libi/libimagequant/libimagequant0_2.12.2-1.1_amd64.deb
+  #    dpkg -x libimagequant0_2.12.2-1.1_amd64.deb $SNAPCRAFT_PART_INSTALL/
 
     build-packages:
       - dpkg
@@ -120,8 +120,8 @@ parts:
       - fonts-freefont-ttf
       - tcl
       - libxml2 
-      # - pngquant 
-      # - libimagequant0
+      - pngquant 
+      - libimagequant0
       - unpaper 
       - qpdf 
       - zlib1g 
@@ -162,7 +162,8 @@ parts:
       snapcraftctl build
       
       pip install -U pip wheel setuptools
-      pip install pdftotext ocrmypdf PySimpleGUI pikepdf pyzbar darkdetect rich
+      #ocrmypdf > 15.0.0 depends on dependecies not available in core20
+      pip install pdftotext ocrmypdf==14.4.0 PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
