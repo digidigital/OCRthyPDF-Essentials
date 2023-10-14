@@ -93,7 +93,17 @@ parts:
 
       # debug
       ls -l ${tessdatapath}
-
+  
+  # for some reason building with core20 just installs v 2.12.0
+  pngquant:
+    plugin: nil
+      override-build: |
+        wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.12.2-1_amd64.deb
+        dpkg -x pngquant_2.12.2-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
+      build-packages:
+        - dpkg
+        - wget
+    
   ocrthypdf:
     plugin: python
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
@@ -105,7 +115,7 @@ parts:
       - fonts-freefont-ttf
       - tcl
       - libxml2 
-      - pngquant 
+      # - pngquant 
       - unpaper 
       - qpdf 
       - zlib1g 
