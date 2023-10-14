@@ -132,6 +132,9 @@ parts:
       - libpoppler97
       - jbig2enc
     
+    stage-snaps:
+      - ocrmypdf
+      
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
@@ -162,8 +165,8 @@ parts:
       snapcraftctl build
       
       pip install -U pip wheel setuptools
-      #ocrmypdf > 15.0.0 depends on dependecies not available in core20
-      pip install pdftotext ocrmypdf==14.4.0 PySimpleGUI pikepdf pyzbar darkdetect rich
+      # ocrmypdf > 15.0.0 depends on dependecies not available in core20 -> crmypdf==14.4.0
+      pip install pdftotext o PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
