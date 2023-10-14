@@ -20,8 +20,8 @@ architectures: [amd64]
 package-repositories:
  - type: apt
    ppa: alex-p/tesseract-ocr5
- - type: apt
-   ppa: alex-p/jbig2enc
+ #- type: apt
+ #  ppa: alex-p/jbig2enc
 
 environment:
     PYTHONPATH: $SNAP/usr/bin/python3.9
@@ -117,20 +117,20 @@ parts:
     stage-packages: 
       - python3.9-venv
       - python3-tk
-      - fonts-freefont-ttf
+      #- fonts-freefont-ttf
       - tcl
       - libxml2 
-      - pngquant 
-      - libimagequant0
-      - unpaper 
-      - qpdf 
+      #- pngquant 
+      #- libimagequant0
+      #- unpaper 
+      #- qpdf 
       - zlib1g 
       - libzbar0
       - libnspr4
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
-      - jbig2enc
+      #- jbig2enc
     
     stage-snaps:
       - ocrmypdf
@@ -166,7 +166,7 @@ parts:
       
       pip install -U pip wheel setuptools
       # ocrmypdf > 15.0.0 depends on dependecies not available in core20 -> crmypdf==14.4.0
-      pip install pdftotext o PySimpleGUI pikepdf pyzbar darkdetect rich
+      pip install pdftotext PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
