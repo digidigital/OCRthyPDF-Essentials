@@ -20,8 +20,6 @@ architectures: [amd64]
 package-repositories:
  - type: apt
    ppa: alex-p/tesseract-ocr5
- #- type: apt
- #  ppa: alex-p/jbig2enc
 
 environment:
     PYTHONPATH: $SNAP/usr/bin/python3.9
@@ -95,19 +93,6 @@ parts:
 
       # debug
       ls -l ${tessdatapath}
-  
-  # for some reason building with core20 just installs v 2.12.0
-  # pngquant:
-  #  plugin: nil
-  #  override-build: |
-  #    wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pngquant/pngquant_2.13.1-1_amd64.deb
-  #    dpkg -x pngquant_2.13.1-1_amd64.deb $SNAPCRAFT_PART_INSTALL/
-  #    wget http://archive.ubuntu.com/ubuntu/pool/main/libi/libimagequant/libimagequant0_2.12.2-1.1_amd64.deb
-  #    dpkg -x libimagequant0_2.12.2-1.1_amd64.deb $SNAPCRAFT_PART_INSTALL/
-
-    build-packages:
-      - dpkg
-      - wget
     
   ocrthypdf:
     plugin: python
@@ -117,20 +102,15 @@ parts:
     stage-packages: 
       - python3.9-venv
       - python3-tk
-      #- fonts-freefont-ttf
       - tcl
       - libxml2 
-      #- pngquant 
-      #- libimagequant0
-      #- unpaper 
-      #- qpdf 
+      - qpdf 
       - zlib1g 
       - libzbar0
       - libnspr4
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
-      #- jbig2enc
     
     stage-snaps:
       - ocrmypdf
@@ -165,7 +145,6 @@ parts:
       snapcraftctl build
       
       pip install -U pip wheel setuptools
-      # ocrmypdf > 15.0.0 depends on dependecies not available in core20 -> crmypdf==14.4.0
       pip install pdftotext PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
