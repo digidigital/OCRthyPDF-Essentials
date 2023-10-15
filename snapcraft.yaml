@@ -17,16 +17,18 @@ compression: lzo
 grade: stable # 'stable' 'devel'
 confinement: strict # 'strict' 'devmode'
 architectures: [amd64]
-#package-repositories:
-# - type: apt
-#   ppa: alex-p/tesseract-ocr5
+package-repositories:
+ - type: apt
+   ppa: alex-p/tesseract-ocr5
+ - type: apt
+   ppa: alex-p/jbig2enc      
 
 environment:
     PYTHONPATH: $SNAP/usr/bin/python3.9
-    #TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
-    #GS_LIB: $SNAP/usr/share/ghostscript/Init 
-    #GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
-    #GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
+    TESSDATA_PREFIX: $SNAP/usr/share/tesseract-ocr/tessdata
+    GS_LIB: $SNAP/usr/share/ghostscript/Init 
+    GS_FONTPATH: $SNAP/usr/share/ghostscript/Font
+    GS_OPTIONS: -sGenericResourceDir=$SNAP/usr/share/ghostscript/ -sICCProfilesDir=$SNAP/usr/share/color/icc/ghostscript/
     SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
 
 apps:
@@ -53,47 +55,47 @@ parts:
     plugin: nil
     stage-snaps: [debian-multiarch-triplet-provider-launch]
 
-  #snapcraft-preload:
-  #    source: https://github.com/sergiusens/snapcraft-preload.git
-  #    plugin: cmake
-  #    cmake-parameters:
-  #    - -DCMAKE_INSTALL_PREFIX=/usr -DLIBPATH=/lib
-  #    build-packages:
-  #      - gcc-multilib
-  #      - g++-multilib
-  #    stage-packages:
-  #      - lib32stdc++6  
-  #    override-build: |
-  #      snapcraftctl build
-  #      ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
+  snapcraft-preload:
+      source: https://github.com/sergiusens/snapcraft-preload.git
+      plugin: cmake
+      cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr -DLIBPATH=/lib
+      build-packages:
+        - gcc-multilib
+        - g++-multilib
+      stage-packages:
+        - lib32stdc++6  
+      override-build: |
+        snapcraftctl build
+        ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
 
-  #pull-parts:
-  #  plugin: nil
-  #  stage-packages: 
-  #    - ghostscript
-  #    - gsfonts
-  #    - icc-profiles-free 
-  #    - tesseract-ocr-all
-  #  build-packages: 
-  #    - ghostscript
-  #    - curl
-  #  override-prime: |
-  #    snapcraftctl prime
+  pull-parts:
+    plugin: nil
+    stage-packages: 
+      - ghostscript
+      - gsfonts      
+      - icc-profiles-free 
+      - tesseract-ocr-all
+    build-packages: 
+      - ghostscript
+      - curl
+    override-prime: |
+      snapcraftctl prime
 
-  #    gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
-  #    ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
+      gslibpath=$(gs -h | grep  Resource/Init | tr -d ' ':)
+      ln -s -f ${gslibpath/\/usr\/share\/ghostscript/.} .${gslibpath}/../../../Init
 
-  #    gsfontpath=$(gs -h | grep  Resource/Font | tr -d ' ':)
-  #    ln -s -f ${gsfontpath/\/usr\/share\/ghostscript/.} .${gsfontpath}/../../../Font
+      gsfontpath=$(gs -h | grep  Resource/Font | tr -d ' ':)
+      ln -s -f ${gsfontpath/\/usr\/share\/ghostscript/.} .${gsfontpath}/../../../Font
 
-  #    tessdatapath=$(find ./ -iname tessdata)                                  
-  #    ln -s -f ${tessdatapath/usr\/share\/tesseract-ocr\//} ${tessdatapath}/../../tessdata
+      tessdatapath=$(find ./ -iname tessdata)                                  
+      ln -s -f ${tessdatapath/usr\/share\/tesseract-ocr\//} ${tessdatapath}/../../tessdata
       
-  #    curl --output "${tessdatapath}/best-#1.traineddata" "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/main/{deu,eng,fra,spa,por,ita,rus,ukr,jpn,jpn_vert,ara,hin,pol}.traineddata" 
+      curl --output "${tessdatapath}/best-#1.traineddata" "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/main/{deu,eng,fra,spa,por,ita,rus,ukr,jpn,jpn_vert,ara,hin,pol}.traineddata" 
 
-  #    # debug
-  #    ls -l ${tessdatapath}
-    
+      # debug
+      ls -l ${tessdatapath}
+
   ocrthypdf:
     plugin: python
     source: https://github.com/digidigital/OCRthyPDF-Essentials.git
@@ -102,8 +104,11 @@ parts:
     stage-packages: 
       - python3.9-venv
       - python3-tk
+      - fonts-freefont-ttf
       - tcl
       - libxml2 
+      - pngquant 
+      - unpaper 
       - qpdf 
       - zlib1g 
       - libzbar0
@@ -112,9 +117,6 @@ parts:
       - libpoppler-cpp0v5
       - libpoppler97
     
-    stage-snaps:
-      - ocrmypdf
-      
     override-pull: |
       snapcraftctl pull  
       snapcraftctl set-version "$(git describe --tags)"
@@ -145,7 +147,8 @@ parts:
       snapcraftctl build
       
       pip install -U pip wheel setuptools
-      pip install pdftotext PySimpleGUI pikepdf pyzbar darkdetect rich
+      # ocrmypdf version >= 15.0.0 has dependecies not available in core20 
+      pip install pdftotext ocrmypdf==14.4.0 PySimpleGUI pikepdf pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
