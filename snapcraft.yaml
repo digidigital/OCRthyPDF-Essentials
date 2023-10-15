@@ -116,6 +116,7 @@ parts:
       - libnss3
       - libpoppler-cpp0v5
       - libpoppler97
+      - jbig2enc
     
     override-pull: |
       snapcraftctl pull  
