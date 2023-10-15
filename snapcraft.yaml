@@ -53,19 +53,19 @@ parts:
     plugin: nil
     stage-snaps: [debian-multiarch-triplet-provider-launch]
 
-  snapcraft-preload:
-      source: https://github.com/sergiusens/snapcraft-preload.git
-      plugin: cmake
-      cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr -DLIBPATH=/lib
-      build-packages:
-        - gcc-multilib
-        - g++-multilib
-      stage-packages:
-        - lib32stdc++6  
-      override-build: |
-        snapcraftctl build
-        ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
+  #snapcraft-preload:
+  #    source: https://github.com/sergiusens/snapcraft-preload.git
+  #    plugin: cmake
+  #    cmake-parameters:
+  #    - -DCMAKE_INSTALL_PREFIX=/usr -DLIBPATH=/lib
+  #    build-packages:
+  #      - gcc-multilib
+  #      - g++-multilib
+  #    stage-packages:
+  #      - lib32stdc++6  
+  #    override-build: |
+  #      snapcraftctl build
+  #      ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
 
   #pull-parts:
   #  plugin: nil
