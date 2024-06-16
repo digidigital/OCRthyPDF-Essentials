@@ -150,7 +150,7 @@ parts:
       pip install -U pip wheel setuptools
       # ocrmypdf version >= 15.0.0 has dependecies not available in core20 
       # PySimpleGUI 4.60.5 is the last FOSS version
-      pip install pdftotext ocrmypdf==14.4.0 PySimpleGUI==4.60.5 pikepdf pyzbar darkdetect rich
+      pip install pdftotext ocrmypdf==14.4.0 PySimpleGUI==4.60.5 pikepdf==8.15.1 pyzbar darkdetect rich
       pip uninstall -y wheel 
 
       # Apply shebang rewrite as done by snapcraft
