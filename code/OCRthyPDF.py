@@ -21,7 +21,7 @@ https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/LICENSE
 """
 
 from os import path, environ, getcwd, makedirs, listdir, remove, set_blocking 
-import PySimpleGUI as sg
+import PySimpleGUI_4_60 as sg
 import sys, ast, signal, subprocess, shlex
 import queue
 import glob
