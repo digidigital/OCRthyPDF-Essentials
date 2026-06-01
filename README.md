@@ -91,4 +91,14 @@ In the console you can see the output of the processes working "under the hood".
 
 The bars at the bottom indicates the status of the OCR job queue. "Queue" refers to documents waiting to be processed.    
 
+# Related Links
+
+You can find alternative software and more information on this topic here, among other places:
+
+- [Tesseract – The text recognition software used by OCRmyPDF](https://github.com/tesseract-ocr/tesseract)
+- [OCRmyPDF online documentation](https://ocrmypdf.readthedocs.io/en/latest/index.html)
+- [ocrmypdfgui – An alternative to OCRthyPDF](https://snapcraft.io/ocrmypdfgui)
+- [scanprep – An alternative command-line splitter](https://snapcraft.io/scanprep)
+- [pdfQRSplit – Another command-line splitter](https://github.com/adlerweb/PdfQRSplit)
+
 A German version of this text can be found [here](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/README_deutsch.md).
