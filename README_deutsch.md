@@ -2,16 +2,16 @@
 
 Originaltext auf: [blog.digidigital.de](https://blog.digidigital.de/?p=525&lang=de_DE)
 
-Da es leider immer wieder vorkommt, dass die Originaldateien eingescannter Texte nicht mehr vorliegen (oder nicht mehr gefunden werden können), muss in diesen Fällen eine Texterkennung bemüht werden, um aus den Bilddateien in den PDFs editierbaren Text zu erzeugen. Das Kommandozeilentool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/) von James Barlow hat mir diesbezüglich schon häufig das Leben im Umgang mit eingescannten Textdateien erleichtert.
+Da es leider immer wieder vorkommt, dass die Originaldateien eingescannter Texte nicht mehr vorliegen (oder nicht mehr gefunden werden können), muss in diesen Fällen eine Texterkennung bemüht werden, um aus den Bilddateien in den PDFs editierbaren Text zu erzeugen. Das Kommandozeilen-Tool [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF/) von James Barlow hat mir diesbezüglich schon häufig das Leben im Umgang mit eingescannten Textdateien erleichtert.
 
-Da es ich keine einfach gehaltene grafische Benutzeroberfläche finden konnte, kam mir die Idee zu OCRthyPDF – Einer Benutzeroberfläche, die Anwendern, die nicht an die Benutzung von Kommandozeilen-Tools gewöhnt sind, den Zugang zu den grundlegenden Funktionen von OCRmyPDF ermöglicht.
+Da ich keine einfach gehaltene grafische Benutzeroberfläche finden konnte, kam mir die Idee zu OCRthyPDF – Einer Benutzeroberfläche, die Anwendern, die nicht an die Benutzung von Kommandozeilen-Tools gewöhnt sind, den Zugang zu den grundlegenden Funktionen von OCRmyPDF ermöglicht.
 
 ![OCRthyPDF GUI](https://raw.githubusercontent.com/digidigital/OCRthyPDF-Essentials/main/screenshots/1.png)
 
 Die Splitter-Funktion erweitert die von OCRmyPDF bereitgestellte Funktionalität um die Option, gescannte Dokumente vor der Texterkennung an [Trennseiten](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) – definiert durch einen QR-Code – zu trennen. Ein QR-Code kann beispielsweise eine [reine Trennseite](https://github.com/digidigital/OCRthyPDF-Essentials/blob/main/testing/Separator.pdf) markieren, die bei der Erstellung der Zieldokumente verworfen wird. Alternativ kann der QR-Code im Aufklebermodus (Sticker Mode) die erste Seite eines neuen Dokuments markieren und wird beibehalten.
 
 # Download und Installationshinweise
-Wenn du Ubuntu oder eine andere Linux-Distro verwendst, auf der Snap / (Gnome Software) bereits  vorinstalliert ist, kannst du OCRthy PDF direkt aus dem Store installieren.
+Wenn du Ubuntu oder eine andere Linux-Distro verwendst, auf der Snap / (Gnome Software) bereits  vorinstalliert ist, kannst du OCRthyPDF direkt aus dem Store installieren.
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/ocrthypdf)
 
